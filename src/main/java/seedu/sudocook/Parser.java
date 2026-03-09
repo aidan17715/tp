@@ -20,6 +20,40 @@ public class Parser {
             C = new DeleteCommand(index);
         } else if (input.startsWith("list-r")){
             C = new ListCommand();
+        } else if (input.startsWith("add-i")) {
+            String addIngredientInput = input.substring("add-i".length()).trim();
+            Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
+            Matcher addIngredientMatcher = addIngredientPattern.matcher(addIngredientInput);
+
+            if (!addIngredientMatcher.matches()) {
+                ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT");
+                return new Command(false);
+            }
+
+            String name = addIngredientMatcher.group(1).trim();
+            String quantityStr = addIngredientMatcher.group(2).trim();
+            String unit = addIngredientMatcher.group(3).trim();
+
+            // Validate name doesn't contain special characters
+            if (!name.matches("[a-zA-Z0-9\\s]+")) {
+                ui.printError("Ingredient name should not contain special characters.");
+                return new Command(false);
+            }
+
+            // Parse and validate quantity
+            double quantity;
+            try {
+                quantity = Double.parseDouble(quantityStr);
+                if (quantity <= 0) {
+                    ui.printError("Quantity must be a positive number.");
+                    return new Command(false);
+                }
+            } catch (NumberFormatException e) {
+                ui.printError("Invalid quantity format.");
+                return new Command(false);
+            }
+
+            C = new AddIngredientCommand(name, quantity, unit, ui);
         } else if (input.startsWith("add-r")) {
             ArrayList<String> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();

@@ -12,4 +12,8 @@ public class Command {
 
     }
 
+    public void execute(Inventory inventory){
+
+    }
+
 }
