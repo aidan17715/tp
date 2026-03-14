@@ -16,6 +16,10 @@ public class Ui {
     public static void formatResponse(String message) {
         printLine();
         for (String line : message.split("\n")) {
+            if (line.isEmpty()) {
+                System.out.println();
+                continue;
+            }
             System.out.println(INDENT + " " + line);
         }
         printLine();

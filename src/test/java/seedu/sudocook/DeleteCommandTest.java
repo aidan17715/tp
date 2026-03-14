@@ -13,8 +13,8 @@ public class DeleteCommandTest {
     @BeforeEach
     public void setUp() {
         recipeBook = new RecipeBook();
-        ArrayList<String> ingredients = new ArrayList<>();
-        ingredients.add("Water");
+        ArrayList<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(new Ingredient("Water", 1, "Liter"));
         ArrayList<String> steps = new ArrayList<>();
         steps.add("Boil it.");
 

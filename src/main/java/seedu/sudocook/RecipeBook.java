@@ -8,10 +8,10 @@ public class RecipeBook {
     public RecipeBook() {
         this.recipes = new ArrayList<>();
         /*Test Purpose*/
-        ArrayList<String> testIngs = new ArrayList<>();
+        ArrayList<Ingredient> testIngs = new ArrayList<>();
         ArrayList<String> testSteps = new ArrayList<>();
-        testIngs.add("MIXUE");
-        testIngs.add("Courage");
+        testIngs.add(new Ingredient("Water", 1, "Liter"));
+        testIngs.add(new Ingredient("Sugar", 1, "mg"));
         testSteps.add("Pour MIXUE into pot");
         testSteps.add("Heat the pot");
         testSteps.add("Drink with your extraordinary courage");
@@ -29,7 +29,7 @@ public class RecipeBook {
         }
     }
 
-    public void addRecipe(String name, ArrayList<String> ingredients, ArrayList<String> steps){
+    public void addRecipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps){
         Recipe newRecipe = new Recipe(name, ingredients, steps);
         recipes.add(newRecipe);
         Ui.printMessage("Added recipe:\n" + newRecipe.toString());

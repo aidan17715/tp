@@ -5,9 +5,12 @@ import static seedu.sudocook.SudoCook.DELETE_R_PREFIX;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 public class Parser {
+    private static Logger logger = Logger.getLogger("Parser");
     private final Ui ui;
+
 
     public Parser(Ui ui) {
         this.ui = ui;
@@ -82,7 +85,9 @@ public class Parser {
 
             c = new AddIngredientCommand(name, quantity, unit, ui);
         } else if (input.startsWith("add-r")) {
-            ArrayList<String> ingredients = new ArrayList<>();
+            logger.log(Level.INFO, "Received logging request");
+
+            ArrayList<Ingredient> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();
             String addRecipeInput = input.substring("add-r".length()).trim();
             Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+)$");
@@ -90,6 +95,7 @@ public class Parser {
 
             if (!addRecipeMatcher.matches()) {
                 ui.printError("Invalid add-r format.");
+                logger.log(Level.INFO, "Caught invalid add-r command format");
                 return new Command(false);
             }
 
@@ -104,10 +110,27 @@ public class Parser {
                 ingredientTokens.add(stripOptionalBraces(ingredientMatcher.group()));
             }
 
-            for (int i = 0; i + 2 < ingredientTokens.size(); i += 3) {
-                ingredients.add(ingredientTokens.get(i) + " "
-                        + ingredientTokens.get(i + 1) + " "
-                        + ingredientTokens.get(i + 2));
+            if (ingredientTokens.size() % 3 != 0) {
+                ui.printError("Invalid add-r format. Ingredients should be NAME QUANTITY UNIT.");
+                logger.log(Level.INFO, "Caught invalid add-r command format in INGREDIENT NAME field");
+                return new Command(false);
+            }
+
+            for (int i = 0; i < ingredientTokens.size(); i += 3) {
+                String ingredientName = ingredientTokens.get(i);
+                String quantityToken = ingredientTokens.get(i + 1);
+                String unit = ingredientTokens.get(i + 2);
+                double quantity;
+
+                try {
+                    quantity = Double.parseDouble(quantityToken);
+                } catch (NumberFormatException e) {
+                    ui.printError("Invalid ingredient quantity in add-r format.");
+                    logger.log(Level.INFO, "Caught invalid add-r command format in QUANTITY field");
+                    return new Command(false);
+                }
+
+                ingredients.add(new Ingredient(ingredientName, quantity, unit));
             }
 
             Matcher stepMatcher = tokenPattern.matcher(stepInput);
