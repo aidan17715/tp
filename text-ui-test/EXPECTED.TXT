@@ -1,11 +1,11 @@
     ____________________________________________________________
      Added recipe:
          Recipe Name: Mixue
-     
+
          Ingredients:
-         - MIXUE
-         - Courage
-     
+         - Water (1.0 Liter)
+         - Sugar (1.0 mg)
+
          Steps:
          - Pour MIXUE into pot
          - Heat the pot
@@ -17,8 +17,8 @@
     >     Recipe Name: Mixue
 
     Ingredients:
-    - MIXUE
-    - Courage
+    - Water (1.0 Liter)
+    - Sugar (1.0 mg)
 
     Steps:
     - Pour MIXUE into pot
@@ -29,12 +29,12 @@
     ____________________________________________________________
      Added recipe:
          Recipe Name: Fried Rice
-     
+
          Ingredients:
-         - rice 2 cups
-         - egg 2 pcs
-         - soy_sauce 1 tbsp
-     
+         - rice (2.0 cups)
+         - egg (2.0 pcs)
+         - soy_sauce (1.0 tbsp)
+
          Steps:
          - Cook the rice.
          - Scramble the eggs.
@@ -44,8 +44,8 @@
     Recipe Name: Mixue
 
     Ingredients:
-    - MIXUE
-    - Courage
+    - Water (1.0 Liter)
+    - Sugar (1.0 mg)
 
     Steps:
     - Pour MIXUE into pot
@@ -55,9 +55,9 @@
     Recipe Name: Fried Rice
 
     Ingredients:
-    - rice 2 cups
-    - egg 2 pcs
-    - soy_sauce 1 tbsp
+    - rice (2.0 cups)
+    - egg (2.0 pcs)
+    - soy_sauce (1.0 tbsp)
 
     Steps:
     - Cook the rice.
@@ -69,8 +69,8 @@
     Recipe Name: Mixue
 
     Ingredients:
-    - MIXUE
-    - Courage
+    - Water (1.0 Liter)
+    - Sugar (1.0 mg)
 
     Steps:
     - Pour MIXUE into pot
