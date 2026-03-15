@@ -1,4 +1,4 @@
-    ____________________________________________________________
+﻿
      Added recipe:
          Recipe Name: Mixue
 
@@ -11,22 +11,22 @@
          - Heat the pot
          - Drink with your extraordinary courage
     ____________________________________________________________
-    ____________________________________________________________
+
      Welcome to SudoCook!
     ____________________________________________________________
-    >     Recipe Name: Mixue
+    >
+     1. Recipe Name: Mixue
 
-    Ingredients:
-    - Water (1.0 Liter)
-    - Sugar (1.0 mg)
+         Ingredients:
+         - Water (1.0 Liter)
+         - Sugar (1.0 mg)
 
-    Steps:
-    - Pour MIXUE into pot
-    - Heat the pot
-    - Drink with your extraordinary courage
-
-    >     ____________________________________________________________
+         Steps:
+         - Pour MIXUE into pot
+         - Heat the pot
+         - Drink with your extraordinary courage
     ____________________________________________________________
+    >
      Added recipe:
          Recipe Name: Fried Rice
 
@@ -40,44 +40,45 @@
          - Scramble the eggs.
          - Mix everything together.
     ____________________________________________________________
-    >     ____________________________________________________________
-    Recipe Name: Mixue
+    >
+     1. Recipe Name: Mixue
 
-    Ingredients:
-    - Water (1.0 Liter)
-    - Sugar (1.0 mg)
+         Ingredients:
+         - Water (1.0 Liter)
+         - Sugar (1.0 mg)
 
-    Steps:
-    - Pour MIXUE into pot
-    - Heat the pot
-    - Drink with your extraordinary courage
+         Steps:
+         - Pour MIXUE into pot
+         - Heat the pot
+         - Drink with your extraordinary courage
 
-    Recipe Name: Fried Rice
+     2. Recipe Name: Fried Rice
 
-    Ingredients:
-    - rice (2.0 cups)
-    - egg (2.0 pcs)
-    - soy_sauce (1.0 tbsp)
+         Ingredients:
+         - rice (2.0 cups)
+         - egg (2.0 pcs)
+         - soy_sauce (1.0 tbsp)
 
-    Steps:
-    - Cook the rice.
-    - Scramble the eggs.
-    - Mix everything together.
-
-    >     ____________________________________________________________
-    >     ____________________________________________________________
-    Recipe Name: Mixue
-
-    Ingredients:
-    - Water (1.0 Liter)
-    - Sugar (1.0 mg)
-
-    Steps:
-    - Pour MIXUE into pot
-    - Heat the pot
-    - Drink with your extraordinary courage
-
-    >     ____________________________________________________________
+         Steps:
+         - Cook the rice.
+         - Scramble the eggs.
+         - Mix everything together.
     ____________________________________________________________
+    >
+     Recipe 2 deleted successfully.
+    ____________________________________________________________
+    >
+     1. Recipe Name: Mixue
+
+         Ingredients:
+         - Water (1.0 Liter)
+         - Sugar (1.0 mg)
+
+         Steps:
+         - Pour MIXUE into pot
+         - Heat the pot
+         - Drink with your extraordinary courage
+    ____________________________________________________________
+    >
      Goodbye! Happy cooking!
     ____________________________________________________________

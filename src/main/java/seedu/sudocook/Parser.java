@@ -19,10 +19,19 @@ public class Parser {
     public Command parse(String input) {
         Command c;
         if (input.startsWith("delete-r")) {
-            int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
-            c = new DeleteCommand(index);
+            logger.log(Level.INFO, "Received delete-r request");
+            try {
+                int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
+                assert index > 0 : "Parsed index must be positive";
+                c = new DeleteRecipeCommand(index);
+            } catch (NumberFormatException e) {
+                logger.log(Level.WARNING, "Invalid index format for delete-r");
+                ui.printError("Invalid index for delete-r. Use: delete-r INDEX");
+                return new Command(false);
+            }
         } else if (input.startsWith("list-r")) {
-            c = new ListCommand();
+            logger.log(Level.INFO, "Received list-r request");
+            c = new ListRecipeCommand();
         } else if (input.startsWith("list-i")) {
             c = new ListIngredientCommand(ui);
         } else if (input.startsWith("delete-i")) {

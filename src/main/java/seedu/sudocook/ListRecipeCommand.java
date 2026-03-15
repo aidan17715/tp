@@ -1,7 +1,7 @@
 package seedu.sudocook;
 
-public class ListCommand extends Command {
-    public ListCommand() {
+public class ListRecipeCommand extends Command {
+    public ListRecipeCommand() {
         super(false);
     }
 

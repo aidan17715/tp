@@ -13,12 +13,16 @@ public class Recipe {
         this.name = "Unknown Dish";
         this.ingredients = null;
         this.steps = null;
+        assert(name.equals("Unknown Dish"));
     }
 
     public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps) {
         this.name = name;
         this.ingredients = ingredients;
         this.steps = steps;
+        assert(name != null);
+        assert(ingredients != null);
+        assert(steps != null);
     }
 
     public String getName() {

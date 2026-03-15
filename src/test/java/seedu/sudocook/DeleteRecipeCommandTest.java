@@ -4,9 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DeleteCommandTest {
+public class DeleteRecipeCommandTest {
     private RecipeBook recipeBook;
     private Recipe testRecipe;
 
@@ -27,18 +26,29 @@ public class DeleteCommandTest {
 
         assertEquals(2, recipeBook.size());
 
-        DeleteCommand deleteCommand = new DeleteCommand(1);
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(1);
         deleteCommand.execute(recipeBook);
 
         assertEquals(1, recipeBook.size());
     }
 
     @Test
-    public void execute_invalidIndex_throwsException() {
-        DeleteCommand deleteCommand = new DeleteCommand(100);
+    public void execute_invalidIndex_recipeBookUnchanged() {
+        int sizeBefore = recipeBook.size();
 
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            deleteCommand.execute(recipeBook);
-        });
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(100);
+        deleteCommand.execute(recipeBook);  // 不再抛异常，内部处理
+
+        assertEquals(sizeBefore, recipeBook.size());  // 大小不变
+    }
+
+    @Test
+    public void execute_zeroIndex_recipeBookUnchanged() {
+        int sizeBefore = recipeBook.size();
+
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(0);
+        deleteCommand.execute(recipeBook);
+
+        assertEquals(sizeBefore, recipeBook.size());
     }
 }
