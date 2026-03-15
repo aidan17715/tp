@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DeleteCommandTest {
+public class DeleteRecipeCommandTest {
     private RecipeBook recipeBook;
     private Recipe testRecipe;
 
@@ -27,7 +27,7 @@ public class DeleteCommandTest {
 
         assertEquals(2, recipeBook.size());
 
-        DeleteCommand deleteCommand = new DeleteCommand(1);
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(1);
         deleteCommand.execute(recipeBook);
 
         assertEquals(1, recipeBook.size());
@@ -35,10 +35,10 @@ public class DeleteCommandTest {
 
     @Test
     public void execute_invalidIndex_throwsException() {
-        DeleteCommand deleteCommand = new DeleteCommand(100);
+        DeleteRecipeCommand deleteRecipeCommand = new DeleteRecipeCommand(100);
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            deleteCommand.execute(recipeBook);
+            deleteRecipeCommand.execute(recipeBook);
         });
     }
 }

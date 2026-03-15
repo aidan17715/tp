@@ -1,5 +1,12 @@
 package seedu.sudocook;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
+
 /**
  * Main class for the SudoCook application.
  * Initializes the application and runs the main loop.
@@ -29,13 +36,25 @@ public class SudoCook {
                 cmd.execute(recipes);
             }
 
-            input = ui.readInput();
+            System.out.flush();
             ui.printLine();
+            input = ui.readInput();
         }
         ui.printBye();
     }
 
     public static void main(String[] args) {
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler h : rootLogger.getHandlers()) {
+            rootLogger.removeHandler(h);
+        }
+        rootLogger.addHandler(new StreamHandler(System.out, new SimpleFormatter()) {
+            @Override
+            public synchronized void publish(LogRecord record) {
+                super.publish(record);
+                flush();
+            }
+        });
         new SudoCook().run();
     }
 }
