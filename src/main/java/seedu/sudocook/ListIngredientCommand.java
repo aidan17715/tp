@@ -6,11 +6,8 @@ import java.util.ArrayList;
  * Command to list all ingredients in the inventory.
  */
 public class ListIngredientCommand extends Command {
-    private final Ui ui;
-
-    public ListIngredientCommand(Ui ui) {
+    public ListIngredientCommand() {
         super(false);
-        this.ui = ui;
     }
 
     @Override
@@ -22,7 +19,7 @@ public class ListIngredientCommand extends Command {
     public void execute(Inventory inventory) {
         ArrayList<Ingredient> ingredients = inventory.getIngredients();
         if (ingredients.isEmpty()) {
-            ui.printMessage("There are no ingredients in the inventory.");
+            Ui.printMessage("There are no ingredients in the inventory.");
             return;
         }
 
@@ -33,6 +30,6 @@ public class ListIngredientCommand extends Command {
                 sb.append("\n");
             }
         }
-        ui.printMessage(sb.toString());
+        Ui.printMessage(sb.toString());
     }
 }

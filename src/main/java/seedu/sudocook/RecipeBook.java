@@ -15,8 +15,7 @@ public class RecipeBook {
         testSteps.add("Pour MIXUE into pot");
         testSteps.add("Heat the pot");
         testSteps.add("Drink with your extraordinary courage");
-        Recipe heatingMIXUE = new Recipe("Heated MIXUE",testIngs,testSteps);
-        addRecipe("Mixue", testIngs, testSteps);
+        recipes.add(new Recipe("Mixue", testIngs, testSteps));
     }
 
     public void removeRecipe(int index) {

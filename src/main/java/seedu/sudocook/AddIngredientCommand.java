@@ -7,7 +7,6 @@ public class AddIngredientCommand extends Command {
     private final String name;
     private final double quantity;
     private final String unit;
-    private final Ui ui;
 
     /**
      * Constructs an AddIngredientCommand with the specified ingredient details.
@@ -15,14 +14,12 @@ public class AddIngredientCommand extends Command {
      * @param name The name of the ingredient
      * @param quantity The quantity of the ingredient
      * @param unit The unit of measurement
-     * @param ui The UI instance for printing messages
      */
-    public AddIngredientCommand(String name, double quantity, String unit, Ui ui) {
+    public AddIngredientCommand(String name, double quantity, String unit) {
         super(false);
         this.name = name;
         this.quantity = quantity;
         this.unit = unit;
-        this.ui = ui;
     }
 
     @Override
@@ -41,6 +38,6 @@ public class AddIngredientCommand extends Command {
         assert quantity > 0 : "Ingredient quantity must be positive";
         Ingredient ingredient = new Ingredient(name, quantity, unit);
         inventory.addIngredient(ingredient);
-        ui.printMessage("Added: " + ingredient);
+        Ui.printMessage("Added: " + ingredient);
     }
 }

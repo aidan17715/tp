@@ -1,17 +1,4 @@
 ﻿
-     Added recipe:
-         Recipe Name: Mixue
-
-         Ingredients:
-         - Water (1.0 Liter)
-         - Sugar (1.0 mg)
-
-         Steps:
-         - Pour MIXUE into pot
-         - Heat the pot
-         - Drink with your extraordinary courage
-    ____________________________________________________________
-
      Welcome to SudoCook!
     ____________________________________________________________
     >

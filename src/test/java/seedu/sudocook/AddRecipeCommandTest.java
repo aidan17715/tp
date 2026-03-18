@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AddRecipeCommandTest {
     private RecipeBook testRecipeBook = new RecipeBook();
-    private Recipe testRecipe;
 
 
     @Test

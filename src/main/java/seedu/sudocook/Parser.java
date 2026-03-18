@@ -33,7 +33,7 @@ public class Parser {
             logger.log(Level.INFO, "Received list-r request");
             c = new ListRecipeCommand();
         } else if (input.startsWith("list-i")) {
-            c = new ListIngredientCommand(ui);
+            c = new ListIngredientCommand();
         } else if (input.startsWith("delete-i")) {
             String deleteInput = input.substring("delete-i".length()).trim();
             String[] parts = deleteInput.split("\\s+");
@@ -98,7 +98,7 @@ public class Parser {
             }
 
             logger.log(Level.FINE, "Creating add-i command for: " + name);
-            c = new AddIngredientCommand(name, quantity, unit, ui);
+            c = new AddIngredientCommand(name, quantity, unit);
         } else if (input.startsWith("add-r")) {
             logger.log(Level.INFO, "Received logging request");
 
