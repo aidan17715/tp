@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -31,11 +30,6 @@ test {
 
 application {
     mainClass.set("seedu.sudocook.SudoCook")
-}
-
-shadowJar {
-    archiveBaseName.set("sudocookg")
-    archiveClassifier.set("")
 }
 
 checkstyle {
