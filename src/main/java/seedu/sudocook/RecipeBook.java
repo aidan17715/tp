@@ -92,4 +92,13 @@ public class RecipeBook {
     public int size(){
         return recipes.size();
     }
+
+    /**
+     * Returns a copy of the recipes list for external use.
+     *
+     * @return ArrayList of recipes
+     */
+    public ArrayList<Recipe> getRecipes() {
+        return new ArrayList<>(recipes);
+    }
 }

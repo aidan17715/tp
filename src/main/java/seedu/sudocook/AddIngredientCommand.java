@@ -1,5 +1,7 @@
 package seedu.sudocook;
 
+import java.time.LocalDate;
+
 /**
  * Command to add an ingredient to the inventory.
  */
@@ -7,6 +9,7 @@ public class AddIngredientCommand extends Command {
     private final String name;
     private final double quantity;
     private final String unit;
+    private final LocalDate expiryDate;
 
     /**
      * Constructs an AddIngredientCommand with the specified ingredient details.
@@ -20,6 +23,23 @@ public class AddIngredientCommand extends Command {
         this.name = name;
         this.quantity = quantity;
         this.unit = unit;
+        this.expiryDate = null;
+    }
+
+    /**
+     * Constructs an AddIngredientCommand with the specified ingredient details and expiry date.
+     *
+     * @param name The name of the ingredient
+     * @param quantity The quantity of the ingredient
+     * @param unit The unit of measurement
+     * @param expiryDate The expiry date of the ingredient (optional)
+     */
+    public AddIngredientCommand(String name, double quantity, String unit, LocalDate expiryDate) {
+        super(false);
+        this.name = name;
+        this.quantity = quantity;
+        this.unit = unit;
+        this.expiryDate = expiryDate;
     }
 
     @Override
@@ -36,7 +56,13 @@ public class AddIngredientCommand extends Command {
         assert inventory != null : "Inventory must not be null";
         assert name != null && !name.isEmpty() : "Ingredient name must not be empty";
         assert quantity > 0 : "Ingredient quantity must be positive";
-        Ingredient ingredient = new Ingredient(name, quantity, unit);
+        
+        Ingredient ingredient;
+        if (expiryDate != null) {
+            ingredient = new Ingredient(name, quantity, unit, expiryDate);
+        } else {
+            ingredient = new Ingredient(name, quantity, unit);
+        }
         inventory.addIngredient(ingredient);
         Ui.printMessage("Added: " + ingredient);
     }

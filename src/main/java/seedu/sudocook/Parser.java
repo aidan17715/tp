@@ -2,6 +2,7 @@ package seedu.sudocook;
 
 import static seedu.sudocook.SudoCook.DELETE_R_PREFIX;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,12 +77,28 @@ public class Parser {
         } else if (input.startsWith("add-i")) {
             logger.log(Level.FINE, "Received add-i request");
             String addIngredientInput = input.substring("add-i".length()).trim();
+            
+            // Extract optional expiry date first
+            LocalDate expiryDate = null;
+            Pattern expiryPattern = Pattern.compile("(.*)\\s+ex/(\\d{4}-\\d{2}-\\d{2})");
+            Matcher expiryMatcher = expiryPattern.matcher(addIngredientInput);
+            if (expiryMatcher.matches()) {
+                addIngredientInput = expiryMatcher.group(1);
+                try {
+                    expiryDate = LocalDate.parse(expiryMatcher.group(2));
+                } catch (java.time.format.DateTimeParseException e) {
+                    logger.log(Level.WARNING, "Invalid expiry date format: " + expiryMatcher.group(2));
+                    ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
+                    return new Command(false);
+                }
+            }
+            
             Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
             Matcher addIngredientMatcher = addIngredientPattern.matcher(addIngredientInput);
 
             if (!addIngredientMatcher.matches()) {
                 logger.log(Level.WARNING, "Invalid add-i format");
-                ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT");
+                ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]");
                 return new Command(false);
             }
 
@@ -112,7 +129,7 @@ public class Parser {
             }
 
             logger.log(Level.FINE, "Creating add-i command for: " + name);
-            c = new AddIngredientCommand(name, quantity, unit);
+            c = new AddIngredientCommand(name, quantity, unit, expiryDate);
         } else if (input.startsWith("add-r")) {
             logger.log(Level.INFO, "Received logging request");
 

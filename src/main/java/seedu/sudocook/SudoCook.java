@@ -33,6 +33,11 @@ public class SudoCook {
         assert recipes != null : "RecipeBook must be initialised";
         assert inventory != null : "Inventory must be initialised";
 
+        // Initialize storage and load data
+        Storage.initializeStorage();
+        Storage.loadRecipes(recipes);
+        Storage.loadInventory(inventory);
+
         ui.printWelcome();
 
         Command cmd;
@@ -66,6 +71,11 @@ public class SudoCook {
             }
             input = ui.readInput();
         }
+        
+        // Save data before exiting
+        Storage.saveRecipes(recipes);
+        Storage.saveInventory(inventory);
+        
         logger.log(Level.INFO, "SudoCook application shutting down");
         Ui.printBye();
     }
