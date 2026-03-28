@@ -70,7 +70,7 @@ public class RecommendRecipeCommandTest {
     @Test
     public void parse_invalidFormat_returnsNoOpCommand() {
         Parser parser = new Parser(new Ui());
-        Command cmd = parser.parse("recommend-r");
+        Command cmd = parser.parse("recommend-r invalid");
 
         assertSame(Command.class, cmd.getClass());
         assertTrue(getOutput().contains("Oops!"));

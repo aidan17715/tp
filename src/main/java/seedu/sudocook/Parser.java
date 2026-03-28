@@ -51,16 +51,19 @@ public class Parser {
         } else if (input.startsWith("recommend-r")) {
             logger.log(Level.INFO, "Received recommend-r request");
             String args = input.substring("recommend-r".length()).trim();
-            if (!args.startsWith("n/")) {
-                Ui.printError("Invalid format. Use: recommend-r n/INGREDIENT_NAME");
+            if (args.isEmpty()) {
+                c = new RecommendByInventoryCommand();
+            } else if (!args.startsWith("n/")) {
+                Ui.printError("Invalid format. Use: recommend-r n/INGREDIENT_NAME or recommend-r");
                 return new Command(false);
+            } else {
+                String ingredientName = args.substring("n/".length()).trim();
+                if (ingredientName.isEmpty()) {
+                    Ui.printError("Ingredient name cannot be empty.");
+                    return new Command(false);
+                }
+                c = new RecommendRecipeCommand(ingredientName);
             }
-            String ingredientName = args.substring("n/".length()).trim();
-            if (ingredientName.isEmpty()) {
-                Ui.printError("Ingredient name cannot be empty.");
-                return new Command(false);
-            }
-            c = new RecommendRecipeCommand(ingredientName);
         } else if (input.startsWith("list-i")) {
             c = new ListIngredientCommand();
         } else if (input.startsWith("delete-i")) {
