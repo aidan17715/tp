@@ -1,6 +1,7 @@
 package seedu.sudocook;
 
 import java.util.ArrayList;
+import seedu.sudocook.util.AnsiColor;
 
 public class Recipe {
     private static final String INDENT = "    ";
@@ -51,21 +52,21 @@ public class Recipe {
         sb.append("Recipe Name: ").append(name).append("\n");
         sb.append("Preparation Time: ").append(time).append(" minutes\n");
 
-        sb.append("\n").append(Ui.CYAN).append(INDENT).append("Ingredients:").append(Ui.RESET).append("\n");
+        sb.append("\n").append(AnsiColor.cyan(INDENT + "Ingredients:")).append("\n");
         if (ingredients.isEmpty()) {
-            sb.append(Ui.CYAN).append(INDENT).append("(No ingredients listed)").append(Ui.RESET).append("\n");
+            sb.append(AnsiColor.cyan(INDENT + "(No ingredients listed)")).append("\n");
         } else {
             for (Ingredient ingredient : ingredients) {
-                sb.append(Ui.CYAN).append(INDENT).append("- ").append(ingredient).append(Ui.RESET).append("\n");
+                sb.append(AnsiColor.cyan(INDENT + "- " + ingredient)).append("\n");
             }
         }
 
-        sb.append("\n").append(Ui.CYAN).append(INDENT).append("Steps:").append(Ui.RESET).append("\n");
+        sb.append("\n").append(AnsiColor.cyan(INDENT + "Steps:")).append("\n");
         if (steps.isEmpty()) {
-            sb.append(Ui.CYAN).append(INDENT).append("(No steps listed)").append(Ui.RESET).append("\n");
+            sb.append(AnsiColor.cyan(INDENT + "(No steps listed)")).append("\n");
         } else {
             for (String step : steps) {
-                sb.append(Ui.CYAN).append(INDENT).append("- ").append(step).append(Ui.RESET).append("\n");
+                sb.append(AnsiColor.cyan(INDENT + "- " + step)).append("\n");
             }
         }
 
