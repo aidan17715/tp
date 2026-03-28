@@ -45,8 +45,9 @@ public class HelpCommand extends Command {
             "INGREDIENT COMMANDS:\n" +
             "--------------------------------------------------------\n" +
             "7. List Ingredients\n" +
-            "   Command : list-i\n" +
-            "   Purpose : Shows all ingredients currently in inventory.\n\n" +
+            "   Command : list-i [ex/{YYYY-MM-DD}]\n" +
+            "   Example : list-i ex/2026-04-01\n" +
+            "   Purpose : Shows all ingredients, or only those expiring before the given date.\n\n" +
             "8. Add Ingredient\n" +
             "   Command : add-i n/{NAME} q/{QUANTITY} u/{UNIT}\n" +
             "   Example : add-i n/Apple q/5 u/pcs\n\n" +

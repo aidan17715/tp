@@ -62,7 +62,27 @@ public class Parser {
             }
             c = new RecommendRecipeCommand(ingredientName);
         } else if (input.startsWith("list-i")) {
-            c = new ListIngredientCommand();
+            logger.log(Level.INFO, "Received list-i request");
+            String listIngredientInput = input.substring("list-i".length()).trim();
+            if (listIngredientInput.isEmpty()) {
+                c = new ListIngredientCommand();
+            } else {
+                Pattern listIngredientPattern = Pattern.compile("ex/(\\d{4}-\\d{2}-\\d{2})");
+                Matcher listIngredientMatcher = listIngredientPattern.matcher(listIngredientInput);
+                if (!listIngredientMatcher.matches()) {
+                    ui.printError("Invalid list-i format. Use: list-i [ex/YYYY-MM-DD]");
+                    return new Command(false);
+                }
+                try {
+                    LocalDate expiryDate = LocalDate.parse(listIngredientMatcher.group(1));
+                    c = new ListIngredientCommand(expiryDate);
+                } catch (java.time.format.DateTimeParseException e) {
+                    logger.log(Level.WARNING, "Invalid expiry date format for list-i: "
+                            + listIngredientMatcher.group(1));
+                    ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
+                    return new Command(false);
+                }
+            }
         } else if (input.startsWith("delete-i")) {
             String deleteInput = input.substring("delete-i".length()).trim();
             String[] parts = deleteInput.split("\\s+");

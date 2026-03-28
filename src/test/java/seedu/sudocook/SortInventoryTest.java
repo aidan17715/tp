@@ -1,0 +1,30 @@
+package seedu.sudocook;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class SortInventoryTest {
+
+    private Inventory inventory;
+
+    @BeforeEach
+    public void setup() {
+        inventory = new Inventory();
+        inventory.addIngredient(new Ingredient("Water", 1, "Liter", LocalDate.of(2020, 1, 1)));
+        inventory.addIngredient(new Ingredient("Milk", 1, "Liter", LocalDate.of(2019, 1, 1)));
+        inventory.addIngredient(new Ingredient("Juice", 1, "Liter", LocalDate.of(2022, 1, 1)));
+    }
+
+    @Test
+    public void sortTest() {
+        Command test = new SortInventoryCommand(false);
+        test.execute(inventory);
+
+        assertTrue(inventory.getIngredients().get(0).getExpiryDate().isBefore(inventory.getIngredients().get(1).getExpiryDate())
+                && inventory.getIngredients().get(1).getExpiryDate().isBefore(inventory.getIngredients().get(2).getExpiryDate()));
+    }
+}

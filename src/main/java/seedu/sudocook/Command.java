@@ -1,5 +1,7 @@
 package seedu.sudocook;
 
+import java.time.LocalDate;
+
 public class Command {
     public boolean isExit;
 
@@ -24,6 +26,10 @@ public class Command {
     }
 
     public void execute(Inventory inventory, RecipeBook recipes) {
+
+    }
+
+    public void execute(Inventory inventory, LocalDate expiry){
 
     }
 
