@@ -110,8 +110,8 @@ public class SudoCook {
                 flush();
             }
         };
-        handler.setLevel(Level.FINE);
-        rootLogger.setLevel(Level.FINE);
+        handler.setLevel(Level.WARNING);
+        rootLogger.setLevel(Level.WARNING);
         rootLogger.addHandler(handler);
         new SudoCook().run();
     }

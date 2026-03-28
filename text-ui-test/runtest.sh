@@ -4,11 +4,11 @@
 cd "${0%/*}"
 
 cd ..
-./gradlew clean shadowJar
+./gradlew clean build -x test
 
 cd text-ui-test
 
-java -ea -jar $(find ../build/libs/ -mindepth 1 -print -quit) < input.txt > ACTUAL.TXT
+java -ea -jar $(find ../build/libs/ -name "*.jar" -type f | head -1) < input.txt > ACTUAL.TXT
 
 cp EXPECTED.TXT EXPECTED-UNIX.TXT
 dos2unix ACTUAL.TXT EXPECTED-UNIX.TXT
