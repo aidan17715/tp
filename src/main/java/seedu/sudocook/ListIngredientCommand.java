@@ -9,10 +9,18 @@ import java.util.ArrayList;
 public class ListIngredientCommand extends Command {
     private final LocalDate expiryCutoff;
 
+    /**
+     * Constructs a command that lists all ingredients in the inventory.
+     */
     public ListIngredientCommand() {
         this(null);
     }
 
+    /**
+     * Constructs a command that lists only ingredients expiring before the given date.
+     *
+     * @param expiryCutoff The exclusive expiry-date cutoff, or {@code null} to list all ingredients
+     */
     public ListIngredientCommand(LocalDate expiryCutoff) {
         super(false);
         this.expiryCutoff = expiryCutoff;
@@ -23,11 +31,23 @@ public class ListIngredientCommand extends Command {
         // Not used
     }
 
+    /**
+     * Lists ingredients using the cutoff configured on this command, if any.
+     *
+     * @param inventory The inventory to read ingredients from
+     */
     @Override
     public void execute(Inventory inventory) {
         execute(inventory, expiryCutoff);
     }
 
+    /**
+     * Lists ingredients in the inventory, optionally restricting results to items whose expiry
+     * date is before the supplied cutoff date.
+     *
+     * @param inventory The inventory to read ingredients from
+     * @param expiry The exclusive expiry-date cutoff, or {@code null} to list all ingredients
+     */
     @Override
     public void execute(Inventory inventory, LocalDate expiry) {
         ArrayList<Ingredient> ingredients = getIngredientsToDisplay(inventory, expiry);
