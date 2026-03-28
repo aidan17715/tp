@@ -19,6 +19,7 @@ public class SudoCook {
     private static RecipeBook recipes;
     private static Inventory inventory;
     private static Ui ui;
+    private static CommandHistory history;
 
     private void run() {
         logger.log(Level.INFO, "Starting SudoCook application");
@@ -27,11 +28,13 @@ public class SudoCook {
         Parser parser = new Parser(ui);
         recipes = new RecipeBook();
         inventory = new Inventory();
+        history = new CommandHistory();
 
         assert ui != null : "Ui must be initialised";
         assert parser != null : "Parser must be initialised";
         assert recipes != null : "RecipeBook must be initialised";
         assert inventory != null : "Inventory must be initialised";
+        assert history != null : "CommandHistory must be initialised";
 
         // Initialize storage and load data
         Storage.initializeStorage();
@@ -49,24 +52,39 @@ public class SudoCook {
                 continue;
             }
             cmd = parser.parse(input);
-            if (cmd instanceof AddIngredientCommand ||
+
+            // Handle UndoCommand specially with history manager
+            if (cmd instanceof UndoCommand) {
+                logger.log(Level.FINE, "Routing undo command");
+                ((UndoCommand) cmd).execute(history, recipes, inventory);
+            } else if (cmd instanceof AddIngredientCommand ||
                     cmd instanceof ListIngredientCommand ||
                     cmd instanceof DeleteIngredientCommand) {
                 logger.log(Level.FINE, "Routing command to Inventory");
+                // Save state before executing modifying command
+                history.saveSnapshot(recipes, inventory);
                 cmd.execute(inventory);
             } else if (cmd instanceof HelpCommand) {
                 logger.log(Level.FINE, "Routing help command");
-                cmd.execute(inventory); // Execute on either, it just prints UI
+                cmd.execute(inventory); // Execute on either, it just prints UI (no state change)
             } else if (cmd instanceof CookCommand) {
                 logger.log(Level.FINE, "Routing cook command");
-
+                // Save state before executing modifying command
+                history.saveSnapshot(recipes, inventory);
                 cmd.execute(recipes.getRecipe(cmd.getIndex()), inventory);
 
             } else if (cmd instanceof RecommendRecipeCommand) {
                 logger.log(Level.FINE, "Routing recommend command");
-                cmd.execute(inventory, recipes);
+                cmd.execute(inventory, recipes); // Read-only, no state change
+            } else if (cmd instanceof ListRecipeCommand) {
+                logger.log(Level.FINE, "Routing list recipe command");
+                cmd.execute(recipes); // Read-only, no state change
             } else {
                 logger.log(Level.FINE, "Routing command to RecipeBook");
+                // Save state before executing modifying command (add-r, delete-r, filter-r)
+                if (!(cmd instanceof ListRecipeCommand) && !(cmd instanceof HelpCommand)) {
+                    history.saveSnapshot(recipes, inventory);
+                }
                 cmd.execute(recipes);
             }
             input = ui.readInput();

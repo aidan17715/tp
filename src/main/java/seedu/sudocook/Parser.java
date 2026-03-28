@@ -230,6 +230,9 @@ public class Parser {
                 Ui.printError("You should indicate the index of the recipe when cooking!");
                 c = new Command(false);
             }
+        } else if (input.trim().equalsIgnoreCase("undo")) {
+            logger.log(Level.INFO, "Received undo request");
+            c = new UndoCommand();
         } else if (input.trim().equalsIgnoreCase("help")) {
             c = new HelpCommand();
         } else {
