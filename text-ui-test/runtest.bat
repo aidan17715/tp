@@ -12,6 +12,9 @@ for /f "tokens=*" %%a in (
     set jarloc=%%a
 )
 
+REM Clean up persisted data before running test
+if exist ..\..\text-ui-test\data rmdir /s /q ..\..\text-ui-test\data
+
 java -ea -jar %jarloc% < ..\..\text-ui-test\input.txt > ..\..\text-ui-test\ACTUAL.TXT
 
 cd ..\..\text-ui-test
