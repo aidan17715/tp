@@ -53,7 +53,7 @@ public class AddIngredientCommandTest {
     }
 
     @Test
-    public void execute_addWithNullExpiry_constructorWithExpiry_addsIngredient() {
+    public void execute_addWithNullExpiry_addsIngredient() {
         AddIngredientCommand cmd = new AddIngredientCommand("Salt", 100, "g", null);
         cmd.execute(inventory);
         assertEquals(1, inventory.size());
