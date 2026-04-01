@@ -87,7 +87,7 @@ public class Parser {
                 Pattern listIngredientPattern = Pattern.compile("ex/(\\d{4}-\\d{2}-\\d{2})");
                 Matcher listIngredientMatcher = listIngredientPattern.matcher(listIngredientInput);
                 if (!listIngredientMatcher.matches()) {
-                    ui.printError("Invalid list-i format. Use: list-i [ex/YYYY-MM-DD]");
+                    Ui.printError("Invalid list-i format. Use: list-i [ex/YYYY-MM-DD]");
                     return new Command(false);
                 }
                 try {
@@ -96,7 +96,7 @@ public class Parser {
                 } catch (java.time.format.DateTimeParseException e) {
                     logger.log(Level.WARNING, "Invalid expiry date format for list-i: "
                             + listIngredientMatcher.group(1));
-                    ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
+                    Ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
                     return new Command(false);
                 }
             }
@@ -104,7 +104,7 @@ public class Parser {
             String deleteInput = input.substring("delete-i".length()).trim();
             String[] parts = deleteInput.split("\\s+");
             if (parts.length == 0 || parts[0].isEmpty()) {
-                ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
+                Ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
                 return new Command(false);
             }
             if (parts.length == 1) {
@@ -113,16 +113,16 @@ public class Parser {
                 try {
                     double quantity = Double.parseDouble(parts[1]);
                     if (quantity <= 0) {
-                        ui.printError("Quantity must be a positive number.");
+                        Ui.printError("Quantity must be a positive number.");
                         return new Command(false);
                     }
                     c = new DeleteIngredientCommand(parts[0], quantity);
                 } catch (NumberFormatException e) {
-                    ui.printError("Invalid quantity for delete-i.");
+                    Ui.printError("Invalid quantity for delete-i.");
                     return new Command(false);
                 }
             } else {
-                ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
+                Ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
                 return new Command(false);
             }
         } else if (input.startsWith("add-i")) {
@@ -139,7 +139,7 @@ public class Parser {
                     expiryDate = LocalDate.parse(expiryMatcher.group(2));
                 } catch (java.time.format.DateTimeParseException e) {
                     logger.log(Level.WARNING, "Invalid expiry date format: " + expiryMatcher.group(2));
-                    ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
+                    Ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
                     return new Command(false);
                 }
             }
@@ -149,7 +149,7 @@ public class Parser {
 
             if (!addIngredientMatcher.matches()) {
                 logger.log(Level.WARNING, "Invalid add-i format");
-                ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]");
+                Ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]");
                 return new Command(false);
             }
 
@@ -160,7 +160,7 @@ public class Parser {
             // Validate name doesn't contain special characters
             if (!name.matches("[a-zA-Z0-9\\s]+")) {
                 logger.log(Level.WARNING, "Ingredient name contains special characters");
-                ui.printError("Ingredient name should not contain special characters.");
+                Ui.printError("Ingredient name should not contain special characters.");
                 return new Command(false);
             }
 
@@ -170,12 +170,12 @@ public class Parser {
                 quantity = Double.parseDouble(quantityStr);
                 if (quantity <= 0) {
                     logger.log(Level.WARNING, "Invalid quantity: " + quantityStr);
-                    ui.printError("Quantity must be a positive number.");
+                    Ui.printError("Quantity must be a positive number.");
                     return new Command(false);
                 }
             } catch (NumberFormatException e) {
                 logger.log(Level.WARNING, "Invalid quantity format: " + quantityStr);
-                ui.printError("Invalid quantity format.");
+                Ui.printError("Invalid quantity format.");
                 return new Command(false);
             }
 
@@ -191,7 +191,7 @@ public class Parser {
             Matcher addRecipeMatcher = addRecipePattern.matcher(addRecipeInput);
 
             if (!addRecipeMatcher.matches()) {
-                ui.printError("Invalid add-r format.");
+                Ui.printError("Invalid add-r format.");
                 logger.log(Level.INFO, "Caught invalid add-r command format");
                 return new Command(false);
             }
@@ -204,7 +204,7 @@ public class Parser {
             try {
                 time = Integer.parseInt(timeInput);
             } catch (NumberFormatException e) {
-                ui.printError("Invalid add-r format. Time should be an integer.");
+                Ui.printError("Invalid add-r format. Time should be an integer.");
                 logger.log(Level.INFO, "Caught invalid add-r command format in TIME field");
                 return new Command(false);
             }
@@ -217,7 +217,7 @@ public class Parser {
             }
 
             if (ingredientTokens.size() % 3 != 0) {
-                ui.printError("Invalid add-r format. Ingredients should be NAME QUANTITY UNIT.");
+                Ui.printError("Invalid add-r format. Ingredients should be NAME QUANTITY UNIT.");
                 logger.log(Level.INFO, "Caught invalid add-r command format in INGREDIENT NAME field");
                 return new Command(false);
             }
@@ -231,7 +231,7 @@ public class Parser {
                 try {
                     quantity = Double.parseDouble(quantityToken);
                 } catch (NumberFormatException e) {
-                    ui.printError("Invalid ingredient quantity in add-r format.");
+                    Ui.printError("Invalid ingredient quantity in add-r format.");
                     logger.log(Level.INFO, "Caught invalid add-r command format in QUANTITY field");
                     return new Command(false);
                 }
@@ -258,7 +258,7 @@ public class Parser {
                 try {
                     maxTime = Integer.parseInt(filterMatcher.group(1));
                 } catch (NumberFormatException e) {
-                    ui.printError("Invalid time format for filter-r.");
+                    Ui.printError("Invalid time format for filter-r.");
                     return new Command(false);
                 }
             }
@@ -289,7 +289,7 @@ public class Parser {
             c = new HelpCommand();
         } else {
             c = new Command(false);
-            ui.printError("I don't recognise that command!");
+            Ui.printError("I don't recognise that command!");
         }
         return c;
 
