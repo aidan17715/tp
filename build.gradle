@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'jacoco'
 }
 
 repositories {
@@ -10,8 +10,10 @@ repositories {
 }
 
 dependencies {
+    implementation group: 'org.json', name: 'json', version: '20230227'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
 }
 
 test {
@@ -29,12 +31,7 @@ test {
 }
 
 application {
-    mainClass.set("seedu.duke.Duke")
-}
-
-shadowJar {
-    archiveBaseName.set("duke")
-    archiveClassifier.set("")
+    mainClass.set("seedu.sudocook.SudoCook")
 }
 
 checkstyle {
@@ -43,4 +40,32 @@ checkstyle {
 
 run{
     standardInput = System.in
+    enableAssertions = true
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'seedu.sudocook.SudoCook'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    archiveFileName = 'sudocookg.jar'
+}
+
+jacoco {
+    toolVersion = '0.8.11'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
 }

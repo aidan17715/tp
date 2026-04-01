@@ -3,7 +3,7 @@ setlocal enableextensions
 pushd %~dp0
 
 cd ..
-call gradlew clean shadowJar
+call gradlew clean build -x test
 
 cd build\libs
 for /f "tokens=*" %%a in (
@@ -12,8 +12,24 @@ for /f "tokens=*" %%a in (
     set jarloc=%%a
 )
 
-java -jar %jarloc% < ..\..\text-ui-test\input.txt > ..\..\text-ui-test\ACTUAL.TXT
+REM Clean up persisted data before running test
+if exist ..\..\text-ui-test\data rmdir /s /q ..\..\text-ui-test\data
+
+java -ea -jar %jarloc% < ..\..\text-ui-test\input.txt > ..\..\text-ui-test\ACTUAL.TXT
 
 cd ..\..\text-ui-test
 
-FC ACTUAL.TXT EXPECTED.TXT >NUL && ECHO Test passed! || Echo Test failed!
+powershell -Command "$utf8NoBom = New-Object System.Text.UTF8Encoding($false); [System.IO.File]::WriteAllLines('ACTUAL-WIN.TXT', (Get-Content ACTUAL.TXT | ForEach-Object { $_.TrimEnd() }), $utf8NoBom)"
+powershell -Command "$utf8NoBom = New-Object System.Text.UTF8Encoding($false); [System.IO.File]::WriteAllLines('EXPECTED-WIN.TXT', (Get-Content EXPECTED.TXT | ForEach-Object { $_.TrimEnd() }), $utf8NoBom)"
+
+FC ACTUAL-WIN.TXT EXPECTED-WIN.TXT >NUL
+set test_result=%errorlevel%
+del /q ACTUAL-WIN.TXT EXPECTED-WIN.TXT
+
+if %test_result%==0 (
+    ECHO Test passed!
+    exit /b 0
+) else (
+    ECHO Test failed!
+    exit /b 1
+)

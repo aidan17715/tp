@@ -1,0 +1,69 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+hide footbox
+
+skinparam MaxMessageSize 150
+
+actor User
+participant ":SudoCook" as SudoCook
+participant ":Parser" as Parser
+participant "cmd:CookCommand" as Cmd
+participant "recipes:RecipeBook" as RecipeBook
+participant "inventory:Inventory" as Inventory
+participant ":Ui" as Ui
+
+User -> SudoCook : enter cook command
+activate SudoCook
+
+SudoCook -> Parser : parse(input)
+activate Parser
+
+create Cmd
+Parser -> Cmd ** : CookCommand
+activate Cmd
+Cmd --> Parser
+deactivate Cmd
+
+Parser --> SudoCook : cmd
+deactivate Parser
+
+SudoCook -> RecipeBook : getRecipe(index)
+activate RecipeBook
+RecipeBook --> SudoCook : recipe
+deactivate RecipeBook
+
+SudoCook -> Cmd : execute(recipe, inventory)
+activate Cmd
+
+Cmd -> Inventory : check required ingredients
+activate Inventory
+Inventory --> Cmd
+deactivate Inventory
+
+alt ingredients available
+    Cmd -> Inventory : remove used ingredients
+    activate Inventory
+    Inventory --> Cmd
+    deactivate Inventory
+
+    Cmd -> Ui : show success message
+    activate Ui
+    Ui --> Cmd
+    deactivate Ui
+else ingredients missing
+    Cmd -> Ui : show error message
+    activate Ui
+    Ui --> Cmd
+    deactivate Ui
+end
+
+SudoCook <-- Cmd
+deactivate Cmd
+destroy Cmd
+
+SudoCook --> User
+deactivate SudoCook
+
+@enduml
