@@ -38,7 +38,7 @@ public class SudoCook {
         Storage.loadRecipes(recipes);
         Storage.loadInventory(inventory);
 
-        ui.printWelcome();
+        Ui.printWelcome();
 
         Command cmd;
         String input = ui.readInput();
