@@ -125,6 +125,45 @@ Sorted!
 
 ---
 
+### Adding an ingredient: `add-i`
+
+Adds an ingredient to your inventory with optional expiry date tracking.
+
+Format: `add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]`
+
+* `n/NAME` is the name of the ingredient.
+* `q/QUANTITY` is the amount of the ingredient (can be decimal, e.g., 2.5).
+* `u/UNIT` is the unit of measurement (e.g., cups, grams, pcs).
+* `ex/YYYY-MM-DD` is optional. If provided, sets the expiry date for the ingredient. Use format YYYY-MM-DD.
+
+Examples:
+
+`add-i n/Tomato q/5 u/pcs ex/2024-12-25`
+
+`add-i n/Flour q/1 u/kg`
+
+Expected output (with expiry):
+```
+Added tomato (5.0 pcs) to inventory. Expiry: 2024-12-25
+```
+
+Expected output (without expiry):
+```
+Added flour (1.0 kg) to inventory.
+```
+
+Expected output (invalid date format):
+```
+Oops! Invalid expiry date format. Use: YYYY-MM-DD
+```
+
+Expected output (missing required field):
+```
+Oops! Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]
+```
+
+---
+
 ### Cooking a recipe: `cook`
 
 Prepares a recipe and deducts its required ingredients from the inventory.
@@ -482,6 +521,35 @@ Oops! Please provide a search query. Use: search-i QUERY
 
 ---
 
+### Undoing commands: `undo`
+
+Reverts the most recent command that modified the inventory or recipes.
+
+Format: `undo`
+
+* Undo restores the previous state of your recipes and inventory.
+* Up to 50 command snapshots are stored. Commands beyond the 50th are not recoverable.
+* Use `undo` multiple times to undo multiple commands in sequence.
+* The `help` command and read-only commands (like `list-i`, `search-r`) cannot be undone.
+
+Examples:
+
+`undo`
+
+`undo` (pressed multiple times to undo several changes)
+
+Expected output (successful undo):
+```
+Command undone successfully!
+```
+
+Expected output (no history available):
+```
+No commands to undo.
+```
+
+---
+
 ### Viewing help: `help`
 
 Displays a guide of all available commands and their formats.
@@ -533,5 +601,6 @@ are fully portable.
 | Recommend by ingredient | `recommend-r n/INGREDIENT_NAME` |
 | Recommend from inventory | `recommend-r` |
 | Recommend nearly-makeable | `recommend-r missing/N` |
+| Undo command | `undo` |
 | View help | `help` |
 | Exit | `bye` |
