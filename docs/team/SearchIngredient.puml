@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+hide footbox
+
+skinparam MaxMessageSize 150
+
+actor User
+participant ":SudoCook" as SudoCook
+participant ":Parser" as Parser
+participant "cmd:SearchIngredientCommand" as Cmd
+participant "inventory:Inventory" as Inventory
+participant ":FuzzySearch" as FuzzySearch
+participant ":Ui" as Ui
+
+User -> SudoCook : run()
+activate SudoCook
+
+SudoCook -> Parser : parse("search-i QUERY")
+activate Parser
+
+create Cmd
+Parser -> Cmd ** : SearchIngredientCommand(query)
+activate Cmd
+Cmd --> Parser
+deactivate Cmd
+
+Parser --> SudoCook : cmd
+deactivate Parser
+
+SudoCook -> Cmd : execute(inventory)
+activate Cmd
+
+Cmd -> Inventory : searchIngredients(query)
+activate Inventory
+
+loop for each ingredient in inventory
+    Inventory -> FuzzySearch : isMatch(query, ingredient.getName())
+    activate FuzzySearch
+    FuzzySearch --> Inventory : boolean
+    deactivate FuzzySearch
+end
+
+alt no matches found
+    Inventory -> Ui : printMessage("No ingredients matched.")
+    activate Ui
+    Ui --> Inventory
+    deactivate Ui
+else matches found
+    Inventory -> Ui : printGradientMessage(matchedIngredients)
+    activate Ui
+    Ui --> Inventory
+    deactivate Ui
+end
+
+Inventory --> Cmd
+deactivate Inventory
+
+SudoCook <-- Cmd
+deactivate Cmd
+destroy Cmd
+
+SudoCook --> User
+deactivate SudoCook
+
+@enduml

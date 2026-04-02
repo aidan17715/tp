@@ -1,0 +1,59 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+hide footbox
+
+skinparam MaxMessageSize 150
+
+actor User
+participant ":SudoCook" as SudoCook
+participant ":Parser" as Parser
+participant "cmd:ListRecipeCommand" as Cmd
+participant "recipes:RecipeBook" as RecipeBook
+participant ":Ui" as Ui
+
+User -> SudoCook : run()
+activate SudoCook
+
+SudoCook -> Parser : parse("list-r")
+activate Parser
+
+create Cmd
+Parser -> Cmd ** : ListRecipeCommand()
+activate Cmd
+Cmd --> Parser
+deactivate Cmd
+
+Parser --> SudoCook : cmd
+deactivate Parser
+
+SudoCook -> Cmd : execute(recipes)
+activate Cmd
+
+Cmd -> RecipeBook : listRecipe()
+activate RecipeBook
+
+alt no recipes in book
+    RecipeBook -> Ui : printMessage("No recipes found.")
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+else recipes exist
+    RecipeBook -> Ui : printGradientMessage(recipeNames)
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+end
+
+RecipeBook --> Cmd
+deactivate RecipeBook
+
+SudoCook <-- Cmd
+deactivate Cmd
+destroy Cmd
+
+SudoCook --> User
+deactivate SudoCook
+
+@enduml

@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+hide footbox
+
+skinparam MaxMessageSize 150
+
+actor User
+participant ":SudoCook" as SudoCook
+participant ":Parser" as Parser
+participant "cmd:SearchRecipeCommand" as Cmd
+participant "recipes:RecipeBook" as RecipeBook
+participant ":FuzzySearch" as FuzzySearch
+participant ":Ui" as Ui
+
+User -> SudoCook : run()
+activate SudoCook
+
+SudoCook -> Parser : parse("search-r QUERY")
+activate Parser
+
+create Cmd
+Parser -> Cmd ** : SearchRecipeCommand(query)
+activate Cmd
+Cmd --> Parser
+deactivate Cmd
+
+Parser --> SudoCook : cmd
+deactivate Parser
+
+SudoCook -> Cmd : execute(recipes)
+activate Cmd
+
+Cmd -> RecipeBook : searchRecipes(query)
+activate RecipeBook
+
+loop for each recipe in recipes
+    RecipeBook -> FuzzySearch : isMatch(query, recipe.getName())
+    activate FuzzySearch
+    FuzzySearch --> RecipeBook : boolean
+    deactivate FuzzySearch
+end
+
+alt no matches found
+    RecipeBook -> Ui : printMessage("No recipes matched.")
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+else matches found
+    RecipeBook -> Ui : printGradientMessage(matchedRecipes)
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+end
+
+RecipeBook --> Cmd
+deactivate RecipeBook
+
+SudoCook <-- Cmd
+deactivate Cmd
+destroy Cmd
+
+SudoCook --> User
+deactivate SudoCook
+
+@enduml

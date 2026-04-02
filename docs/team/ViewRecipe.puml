@@ -1,0 +1,72 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+hide footbox
+
+skinparam MaxMessageSize 150
+
+actor User
+participant ":SudoCook" as SudoCook
+participant ":Parser" as Parser
+participant "cmd:ViewRecipeCommand" as Cmd
+participant "recipes:RecipeBook" as RecipeBook
+participant ":Ui" as Ui
+
+User -> SudoCook : run()
+activate SudoCook
+
+SudoCook -> Parser : parse("view-r [INDEX]")
+activate Parser
+
+alt no index provided
+    create Cmd
+    Parser -> Cmd ** : ViewRecipeCommand()
+    activate Cmd
+    Cmd --> Parser
+    deactivate Cmd
+else index provided
+    create Cmd
+    Parser -> Cmd ** : ViewRecipeCommand(index)
+    activate Cmd
+    Cmd --> Parser
+    deactivate Cmd
+end
+
+Parser --> SudoCook : cmd
+deactivate Parser
+
+SudoCook -> Cmd : execute(recipes)
+activate Cmd
+
+alt index == -1 (view all)
+    Cmd -> RecipeBook : viewRecipe()
+else index provided
+    Cmd -> RecipeBook : viewRecipe(index)
+end
+
+activate RecipeBook
+
+alt no recipes or invalid index
+    RecipeBook -> Ui : printError(message)
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+else success
+    RecipeBook -> Ui : printGradientMessage(recipeDetails)
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+end
+
+RecipeBook --> Cmd
+deactivate RecipeBook
+
+SudoCook <-- Cmd
+deactivate Cmd
+destroy Cmd
+
+SudoCook --> User
+deactivate SudoCook
+
+@enduml

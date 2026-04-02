@@ -142,6 +142,18 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 2. If an index is given, `RecipeBook.viewRecipe(int index)` validates the index and prints the single recipe's `toString()` directly.
 3. Invalid indices print an error via `Ui.printError()`.
 
+#### Sequence Diagrams
+
+![List Recipe Sequence Diagram](team/ListRecipe.png)
+
+*Figure 5: Sequence Diagram for the `list-r` command*
+
+![View Recipe Sequence Diagram](team/ViewRecipe.png)
+
+*Figure 6: Sequence Diagram for the `view-r` command*
+
+---
+
 #### Design Considerations
 
 **Aspect: Separating list and view into two commands**
@@ -571,6 +583,18 @@ Key snippet from `FuzzySearch`:
   int maxLen = Math.max(q.length(), t.length());
   return Math.max(0, (int) ((1.0 - (double) dist / maxLen) * 60));
 ```
+
+---
+
+#### Sequence Diagrams
+
+![Search Recipe Sequence Diagram](team/SearchRecipe.png)
+
+*Figure 7: Sequence Diagram for the `search-r` command*
+
+![Search Ingredient Sequence Diagram](team/SearchIngredient.png)
+
+*Figure 8: Sequence Diagram for the `search-i` command*
 
 ---
 
