@@ -16,5 +16,8 @@ through an intuitive text interface.
 - Revise help command accordingly.
 - Implement expiry date propagation when running add-i on an ingredient previously not posessing an expiry date.
 - Contribution to the DG: `sort-i`, `cook`, `list-r` commands, drew sequence diagrams: [list-i](ListIngredients.png), [sort-i](SortInventory.png), [cook](cook.png)
-- Contributions to team-based tasks: set up the github organization and forked the repository.
-- Review/mentoring: led the division of tasks in a manner that reduces temporal and interpersonal dependency (so that, ideally, work related to the same functional code only done by one person in a week, a team member doesn't need to wait until another member has finished, and everyone has roughly equal workload).
+
+
+#### Contributions to team-based tasks 
+- Set up the github organization and forked the repository.
+- Led the division of tasks in a manner that reduces temporal and interpersonal dependency (so that, ideally, work related to the same functional code only done by one person in a week, a team member doesn't need to wait until another member has finished, and everyone has roughly equal workload).
