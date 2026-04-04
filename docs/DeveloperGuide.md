@@ -1090,9 +1090,12 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 | v1.0 | User | Add a recipe | I don’t have to rely on my memory for instructions |
 | v1.0 | User | Delete a recipe | I can keep my recipe list clean and organized |
 | v2.0 | Budget-conscious Student | List all items sorted by their expiry dates | I can prioritize ingredients about to spoil and avoid wasting money |
-| v2.0 | Indecisive Student | Request recipe suggestions based on current stock | I don’t have to spend mental energy deciding what to cook |
+| v2.0 | Indecisive Student | Request recipe suggestions | I don’t have to spend mental energy deciding what to cook |
 | v2.0 | Power User | Mark a recipe as “cooked” to auto-deduct ingredients | My stock levels remain accurate with minimal manual adjustment |
 | v2.0 | Health-conscious Student | Filter recipes by calorie count | I can maintain nutritional goals without manual calculations |
+| v2.0 | Fast-typer | Use an "undo" command to revert the last change | I can quickly fix accidental deletions or typos |
+| v2.0 | Busy Student | Filter recipe suggestions by cooking time (e.g.< 15 mins) | I can prepare a meal that fits between my lectures |
+| v2.0 | Forgetful User | Use keyword or fuzzy search for ingredients/recipes | I can find items even if I don't remember the exact name |
 
 ## Non-Functional Requirements
 
@@ -1116,5 +1119,9 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 4. **View recipe**: `view-r 1`. Verify full recipe details including calories are displayed.
 5. **Filter recipes**: `filter-r t/20`. Verify only recipes with time ≤ 20 are shown.
 6. **Filter by calories**: `filter-r c/300`. Verify only recipes with calories ≤ 300 are shown.
-7. **Delete a recipe**: `delete-r 1`. Verify the recipe is removed and `list-r` no longer shows it.
-8. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes are loaded.
+7. **Add an ingredient**: `add-i n/egg q/3 u/pcs`. Verify the ingredient is added with the correct details.
+8. **Ingredient-based recommendation**: `recommend-r n/egg`. Verify only recipes requiring enough eggs are displayed.
+9. **Inventory-based recommendation**: `recommend-r`. Verify only recipes can be made by using current stocks are displayed.
+10. **Missing-based recommendation**: `recommend-r missing/2`. Verify only recipes missing 2 or more ingredients are displayed.
+11. **Delete a recipe**: `delete-r 1`. Verify the recipe is removed and `list-r` no longer shows it.
+12. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes are loaded.
