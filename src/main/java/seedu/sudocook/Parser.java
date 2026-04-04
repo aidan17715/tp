@@ -19,11 +19,12 @@ public class Parser {
     }
 
     public Command parse(String input) {
+        String trimmedInput = input.trim();
         Command c;
-        if (input.startsWith("delete-r")) {
+        if (matchesCommandKeyword(trimmedInput, "delete-r")) {
             logger.log(Level.INFO, "Received delete-r request");
             try {
-                int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
+                int index = Integer.parseInt(trimmedInput.substring(DELETE_R_PREFIX).trim());
                 assert index > 0 : "Parsed index must be positive";
                 c = new DeleteRecipeCommand(index);
             } catch (NumberFormatException e) {
@@ -31,12 +32,12 @@ public class Parser {
                 Ui.printError("Invalid index for delete-r. Use: delete-r INDEX");
                 return new Command(false);
             }
-        } else if (input.startsWith("list-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "list-r")) {
             logger.log(Level.INFO, "Received list-r request");
             c = new ListRecipeCommand();
-        } else if (input.startsWith("view-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "view-r")) {
             logger.log(Level.INFO, "Received view-r request");
-            String viewArgs = input.substring("view-r".length()).trim();
+            String viewArgs = trimmedInput.substring("view-r".length()).trim();
             if (viewArgs.isEmpty()) {
                 c = new ViewRecipeCommand();
             } else {
@@ -48,9 +49,9 @@ public class Parser {
                     c = new Command(false);
                 }
             }
-        } else if (input.startsWith("recommend-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "recommend-r")) {
             logger.log(Level.INFO, "Received recommend-r request");
-            String args = input.substring("recommend-r".length()).trim();
+            String args = trimmedInput.substring("recommend-r".length()).trim();
             if (args.isEmpty()) {
                 c = new RecommendByInventoryCommand();
             } else if (args.startsWith("missing/")) {
@@ -78,9 +79,9 @@ public class Parser {
                 }
                 c = new RecommendByIngredientCommand(ingredientName);
             }
-        } else if (input.startsWith("list-i")) {
+        } else if (matchesCommandKeyword(trimmedInput, "list-i")) {
             logger.log(Level.INFO, "Received list-i request");
-            String listIngredientInput = input.substring("list-i".length()).trim();
+            String listIngredientInput = trimmedInput.substring("list-i".length()).trim();
             if (listIngredientInput.isEmpty()) {
                 c = new ListIngredientCommand();
             } else {
@@ -100,8 +101,8 @@ public class Parser {
                     return new Command(false);
                 }
             }
-        } else if (input.startsWith("delete-i")) {
-            String deleteInput = input.substring("delete-i".length()).trim();
+        } else if (matchesCommandKeyword(trimmedInput, "delete-i")) {
+            String deleteInput = trimmedInput.substring("delete-i".length()).trim();
             String[] parts = deleteInput.split("\\s+");
             if (parts.length == 0 || parts[0].isEmpty()) {
                 Ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
@@ -125,9 +126,9 @@ public class Parser {
                 Ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
                 return new Command(false);
             }
-        } else if (input.startsWith("add-i")) {
+        } else if (matchesCommandKeyword(trimmedInput, "add-i")) {
             logger.log(Level.FINE, "Received add-i request");
-            String addIngredientInput = input.substring("add-i".length()).trim();
+            String addIngredientInput = trimmedInput.substring("add-i".length()).trim();
             
             // Extract optional expiry date first
             LocalDate expiryDate = null;
@@ -181,12 +182,12 @@ public class Parser {
 
             logger.log(Level.FINE, "Creating add-i command for: " + name);
             c = new AddIngredientCommand(name, quantity, unit, expiryDate);
-        } else if (input.startsWith("add-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "add-r")) {
             logger.log(Level.INFO, "Received logging request");
 
             ArrayList<Ingredient> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();
-            String addRecipeInput = input.substring("add-r".length()).trim();
+            String addRecipeInput = trimmedInput.substring("add-r".length()).trim();
             Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+?)\\s+t/(\\d+)\\s+c/(\\d+)$");
             Matcher addRecipeMatcher = addRecipePattern.matcher(addRecipeInput);
 
@@ -258,9 +259,9 @@ public class Parser {
 
             c = new AddRecipeCommand(name, ingredients, steps, time, calories);
 
-        } else if (input.startsWith("filter-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "filter-r")) {
             logger.log(Level.INFO, "Received filter-r request");
-            String filterInput = input.substring("filter-r".length()).trim();
+            String filterInput = trimmedInput.substring("filter-r".length()).trim();
 
             Integer maxTime = null;
             Integer maxCalories = null;
@@ -294,38 +295,37 @@ public class Parser {
 
             c = new FilterRecipeCommand(maxTime, maxCalories);
 
-        } else if (input.startsWith("cook")) {
+        } else if (matchesCommandKeyword(trimmedInput, "cook")) {
             logger.log(Level.INFO, "Received cook-r request");
-            String[] words = input.split(" ");
-            int index = 0;
+            String cookArgs = trimmedInput.substring("cook".length()).trim();
             try {
-                index = Integer.parseInt(words[1]) - 1;
+                int index = Integer.parseInt(cookArgs) - 1;
                 c = new CookCommand(false, index);
-            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            } catch (NumberFormatException e) {
                 Ui.printError("You should indicate the index of the recipe when cooking!");
                 c = new Command(false);
             }
-        } else if (input.startsWith("sort-i")){
+        } else if (matchesCommandKeyword(trimmedInput, "sort-i")){
             logger.log(Level.INFO, "Received sort-i request");
             c = new SortInventoryCommand(false);
             return c;
-        } else if (input.startsWith("search-r")) {
+        } else if (matchesCommandKeyword(trimmedInput, "search-r")) {
             logger.log(Level.INFO, "Received search-r request");
-            String query = input.substring("search-r".length()).trim();
+            String query = trimmedInput.substring("search-r".length()).trim();
             if (query.isEmpty()) {
                 Ui.printError("Please provide a search query. Use: search-r QUERY");
                 return new Command(false);
             }
             c = new SearchRecipeCommand(query);
-        } else if (input.startsWith("search-i")) {
+        } else if (matchesCommandKeyword(trimmedInput, "search-i")) {
             logger.log(Level.INFO, "Received search-i request");
-            String query = input.substring("search-i".length()).trim();
+            String query = trimmedInput.substring("search-i".length()).trim();
             if (query.isEmpty()) {
                 Ui.printError("Please provide a search query. Use: search-i QUERY");
                 return new Command(false);
             }
             c = new SearchIngredientCommand(query);
-        } else if (input.trim().equalsIgnoreCase("help")) {
+        } else if (trimmedInput.equalsIgnoreCase("help")) {
             c = new HelpCommand();
         } else {
             c = new Command(false);
@@ -340,5 +340,12 @@ public class Parser {
             return token.substring(1, token.length() - 1);
         }
         return token;
+    }
+
+    private boolean matchesCommandKeyword(String input, String keyword) {
+        return input.equals(keyword)
+                || (input.startsWith(keyword)
+                && input.length() > keyword.length()
+                && Character.isWhitespace(input.charAt(keyword.length())));
     }
 }
