@@ -24,31 +24,31 @@ public class DeleteRecipeCommandTest {
     @Test
     public void execute_validIndex_recipeRemoved() {
 
-        assertEquals(1, recipeBook.size());
+        assertEquals(1, recipeBook.getSize());
 
         DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(1);
         deleteCommand.execute(recipeBook);
 
-        assertEquals(0, recipeBook.size());
+        assertEquals(0, recipeBook.getSize());
     }
 
     @Test
     public void execute_invalidIndex_recipeBookUnchanged() {
-        int sizeBefore = recipeBook.size();
+        int sizeBefore = recipeBook.getSize();
 
         DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(100);
         deleteCommand.execute(recipeBook);  // 不再抛异常，内部处理
 
-        assertEquals(sizeBefore, recipeBook.size());  // 大小不变
+        assertEquals(sizeBefore, recipeBook.getSize());  // 大小不变
     }
 
     @Test
     public void execute_zeroIndex_recipeBookUnchanged() {
-        int sizeBefore = recipeBook.size();
+        int sizeBefore = recipeBook.getSize();
 
         DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(0);
         deleteCommand.execute(recipeBook);
 
-        assertEquals(sizeBefore, recipeBook.size());
+        assertEquals(sizeBefore, recipeBook.getSize());
     }
 }

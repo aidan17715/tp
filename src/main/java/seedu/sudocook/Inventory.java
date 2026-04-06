@@ -53,7 +53,7 @@ public class Inventory {
      *
      * @return The number of ingredients
      */
-    public int size() {
+    public int getSize() {
         return ingredients.size();
     }
 

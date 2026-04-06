@@ -73,7 +73,7 @@ public class AddIngredientCommand extends Command {
             return;
         }
 
-        for (int i = 0; i < inventory.size(); i++) {
+        for (int i = 0; i < inventory.getSize(); i++) {
             Ingredient existing = inventory.getIngredient(i);
             if (existing.getName().equalsIgnoreCase(name)
                     && existing.getUnit().equalsIgnoreCase(unit)

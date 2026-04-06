@@ -17,7 +17,7 @@ public class AddIngredientCommandTest {
         AddIngredientCommand command = new AddIngredientCommand("Milk", 2, "carton", expiryDate);
         command.execute(inventory);
 
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertEquals(3, inventory.getIngredient(0).getQuantity());
         assertEquals(expiryDate, inventory.getIngredient(0).getExpiryDate());
     }
@@ -28,7 +28,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Flour q/1.5 u/kg", inventory);
 
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertEquals("Flour", inventory.getIngredient(0).getName());
         assertEquals(1.5, inventory.getIngredient(0).getQuantity());
         assertEquals("kg", inventory.getIngredient(0).getUnit());
@@ -41,7 +41,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Tomato q/3 u/pcs ex/2026-04-10", inventory);
 
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertEquals("Tomato", inventory.getIngredient(0).getName());
         assertEquals(3, inventory.getIngredient(0).getQuantity());
         assertEquals("pcs", inventory.getIngredient(0).getUnit());
@@ -54,7 +54,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/quinoa q/1 u/kg", inventory);
 
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertEquals("quinoa", inventory.getIngredient(0).getName());
         assertEquals(1, inventory.getIngredient(0).getQuantity());
         assertEquals("kg", inventory.getIngredient(0).getUnit());
@@ -67,7 +67,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Flour q/1.5", inventory);
 
-        assertEquals(0, inventory.size());
+        assertEquals(0, inventory.getSize());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Milk q/1 u/carton ex/2026-02-30", inventory);
 
-        assertEquals(0, inventory.size());
+        assertEquals(0, inventory.getSize());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Tom@to q/3 u/pcs", inventory);
 
-        assertEquals(0, inventory.size());
+        assertEquals(0, inventory.getSize());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Sugar q/0 u/g", inventory);
 
-        assertEquals(0, inventory.size());
+        assertEquals(0, inventory.getSize());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AddIngredientCommandTest {
 
         parseAndExecute("add-i n/Sugar q/-1 u/g", inventory);
 
-        assertEquals(0, inventory.size());
+        assertEquals(0, inventory.getSize());
     }
 
     private void parseAndExecute(String input, Inventory inventory) {
