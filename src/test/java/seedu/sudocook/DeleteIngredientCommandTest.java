@@ -40,7 +40,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deleteByNameRemoveAll_removesIngredient() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("Apple", new Ui());
         cmd.execute(inventory);
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertTrue(getOutput().contains("Removed all of"));
     }
 
@@ -49,7 +49,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deleteByIndexRemoveAll_removesIngredient() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("1", new Ui());
         cmd.execute(inventory);
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertTrue(getOutput().contains("Removed all of"));
     }
 
@@ -58,7 +58,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deletePartialQuantity_updatesQuantity() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("Apple", 3);
         cmd.execute(inventory);
-        assertEquals(2, inventory.size());
+        assertEquals(2, inventory.getSize());
         assertEquals(7.0, inventory.getIngredient(0).getQuantity());
         assertTrue(getOutput().contains("Removed 3.0"));
     }
@@ -68,7 +68,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deleteExceedingQuantity_removesAll() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("Apple", 100);
         cmd.execute(inventory);
-        assertEquals(1, inventory.size());
+        assertEquals(1, inventory.getSize());
         assertTrue(getOutput().contains("Removed all of"));
     }
 
@@ -77,7 +77,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deleteNonExistent_printsError() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("Banana", new Ui());
         cmd.execute(inventory);
-        assertEquals(2, inventory.size());
+        assertEquals(2, inventory.getSize());
         assertTrue(getOutput().contains("not found"));
     }
 
@@ -86,7 +86,7 @@ public class DeleteIngredientCommandTest {
     public void execute_deleteByInvalidIndex_printsError() {
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("99", new Ui());
         cmd.execute(inventory);
-        assertEquals(2, inventory.size());
+        assertEquals(2, inventory.getSize());
         assertTrue(getOutput().contains("not found"));
     }
 
@@ -96,6 +96,6 @@ public class DeleteIngredientCommandTest {
         RecipeBook recipeBook = new RecipeBook();
         DeleteIngredientCommand cmd = new DeleteIngredientCommand("Apple", new Ui());
         cmd.execute(recipeBook);
-        assertEquals(0, recipeBook.size());
+        assertEquals(0, recipeBook.getSize());
     }
 }

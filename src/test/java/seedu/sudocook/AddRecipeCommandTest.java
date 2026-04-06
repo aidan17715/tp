@@ -29,7 +29,7 @@ public class AddRecipeCommandTest {
         AddRecipeCommand test = new AddRecipeCommand("Zhajiangmian", ingredients, steps, 10, 350);
         test.execute(testRecipeBook);
 
-        assertEquals(1, testRecipeBook.size());
+        assertEquals(1, testRecipeBook.getSize());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class AddRecipeCommandTest {
         Command cmd;
         cmd = parser.parse(testCmd);
         cmd.execute(testRecipeBook);
-        assertEquals(0, testRecipeBook.size());
+        assertEquals(0, testRecipeBook.getSize());
 
     }
 
@@ -53,7 +53,7 @@ public class AddRecipeCommandTest {
         Command cmd;
         cmd = parser.parse(testCmd);
         cmd.execute(testRecipeBook);
-        assertEquals(1, testRecipeBook.size());
+        assertEquals(1, testRecipeBook.getSize());
 
     }
 
@@ -80,7 +80,7 @@ public class AddRecipeCommandTest {
             Command cmd = parser.parse(testCmd);
             cmd.execute(testRecipeBook);
 
-            assertEquals(0, testRecipeBook.size());
+            assertEquals(0, testRecipeBook.getSize());
             assertTrue(output.toString(StandardCharsets.UTF_8)
                     .contains("Oops! Invalid ingredient quantity in add-r format."));
         } finally {

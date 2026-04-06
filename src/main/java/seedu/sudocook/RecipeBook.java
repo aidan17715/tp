@@ -135,7 +135,7 @@ public class RecipeBook {
         }
     }
 
-    public int size(){
+    public int getSize(){
         return recipes.size();
     }
 

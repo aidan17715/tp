@@ -50,7 +50,7 @@ public class CookTest {
         Command cmd = parser.parse("cook 1");
         executeCookCommand(cmd);
 
-        assertEquals(2, ingredients.size());
+        assertEquals(2, ingredients.getSize());
         assertEquals(1.0, ingredients.getIngredient(ingredients.findIndexByName("Water")).getQuantity());
         assertEquals(0.5, ingredients.getIngredient(ingredients.findIndexByName("Sugar")).getQuantity());
         assertTrue(getOutput().contains("Oops! Not enough ingredients"));
@@ -87,7 +87,7 @@ public class CookTest {
         Command cmd = parser.parse("cook 2");
         executeCookCommand(cmd);
 
-        assertEquals(1, ingredients.size());
+        assertEquals(1, ingredients.getSize());
         assertEquals(1.0, ingredients.getIngredient(0).getQuantity());
         assertTrue(getOutput().contains("Oops! Index out of bounds"));
     }
@@ -100,7 +100,7 @@ public class CookTest {
         Command cmd = parser.parse("cook 1");
         executeCookCommand(cmd);
 
-        assertEquals(0, ingredients.size());
+        assertEquals(0, ingredients.getSize());
     }
 
     private void executeCookCommand(Command cmd) {
