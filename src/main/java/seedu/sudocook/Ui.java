@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 
 public class Ui {
-    // All static variables first
     private static final boolean IS_TTY = System.console() != null;
     public static final String RESET = IS_TTY ? "\u001B[0m" : "";
     public static final String RED = IS_TTY ? "\u001B[31m" : "";

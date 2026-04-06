@@ -9,7 +9,7 @@ skinparam MaxMessageSize 150
 actor User
 participant ":SudoCook" as SudoCook
 participant ":Parser" as Parser
-participant "cmd:RecommendByInventoryCommand" as Cmd
+participant "cmd:RecommendByMissingCommand" as Cmd
 participant "inventory:Inventory" as Inventory
 participant "item:Ingredient" as Item
 participant "recipes:RecipeBook" as RecipeBook
@@ -19,19 +19,19 @@ participant ":Ui" as Ui
 User -> SudoCook : run()
 activate SudoCook
 
-SudoCook -> Parser : parse("recommend-r")
+SudoCook -> Parser : parse("recommend-r missing/2")
 activate Parser
 
 create Cmd
-Parser -> Cmd ** : RecommendByInventoryCommand()
+Parser -> Cmd ** :RecommendByMissingCommand(2)
 activate Cmd
 Cmd --> Parser
 deactivate Cmd
 
-Parser --> SudoCook : cmd:RecommendByInventoryCommand
+Parser --> SudoCook : cmd:RecommendByMissingCommand
 deactivate Parser
 
-SudoCook -> Cmd : execute(inventory,recipes)
+SudoCook -> Cmd : execute(inventory, recipes)
 activate Cmd
 
 loop for each recipe in recipes
@@ -39,6 +39,9 @@ loop for each recipe in recipes
     activate RecipeBook
     RecipeBook --> Cmd : recipe
     deactivate RecipeBook
+
+    Cmd -> Cmd : getMissingIngredients(recipe, inventory)
+    activate Cmd
 
     Cmd -> Recipe : getIngredients()
     activate Recipe
@@ -58,14 +61,18 @@ loop for each recipe in recipes
         end
     end
     alt available < required.getQuantity()
-        note right of Cmd : recipe excluded immediately
+        note right of Cmd : add to missing list
     end
-    alt all ingredients available
+
+    Cmd --> Cmd : missing
+    deactivate Cmd
+
+    alt 0 < missing.size() <= maxMissing
         Cmd -> Recipe : getName()
         activate Recipe
         Recipe --> Cmd : recipeName
         deactivate Recipe
-        note right of Cmd : append recipeName to resultList (sb)
+        note right of Cmd : append recipeName + missing to resultList (sb)
     end
 end
 
