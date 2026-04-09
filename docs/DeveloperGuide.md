@@ -1,5 +1,7 @@
 # Developer Guide
 
+![Architecture Diagram](team/ArchDiagram.png)
+
 ## Acknowledgements
 
 This project is based on the [AddressBook-Level3 (AB3)](https://se-education.org/addressbook-level3/)
@@ -7,45 +9,67 @@ project created by the [SE-EDU initiative](https://se-education.org).
 
 ## Design & implementation
 
-### `recommend-r` — Ingredient-based Recipe Recommendation
+### `recommend-r` — Recipe Recommendation
 
 #### Overview
 
-The `recommend-r` command recommends recipes that the user can make given a specific ingredient                                                                       
-currently in their inventory. It checks that the ingredient exists in the inventory and that the
-recipe's required quantity does not exceed what is available.
+![Recommend Command Class Diagram](team/RecommendClassDiagram.png)
 
-**Command format:** `recommend-r n/INGREDIENT_NAME`
+*Figure 1: Class Diagram for Recommendation Commands*
+
+  ---
+
+The `recommend-r` command supports three modes of recipe recommendation:
+
+- **Ingredient-based mode** (`recommend-r n/INGREDIENT_NAME`): recommends recipes that use a specific
+  ingredient, provided the inventory holds enough of it.
+- **Inventory-based mode** (`recommend-r`): recommends every recipe whose **full** ingredient list
+  can be satisfied by the current inventory — i.e. every required ingredient is present and in
+  sufficient quantity.
+- **Missing-based mode** (`recommend-r missing/N`): recommends recipes that are missing **at most N**
+  ingredients (or insufficient quantities), and shows the exact shortfall for each missing ingredient
+  so the user knows what to buy.
+
+**Command formats:**
+
+| Mode | Format | Example |
+|---|---|---|
+| Ingredient-based | `recommend-r n/INGREDIENT_NAME` | `recommend-r n/egg` |
+| Inventory-based | `recommend-r` | `recommend-r` |
+| Missing-based | `recommend-r missing/N` | `recommend-r missing/2` |
 
   ---
 
 #### Implementation
 
-The feature involves four classes:
+The feature involves six classes:
 
 | Class | Role |
 |---|---|
-| `Parser` | Parses raw input, validates format, and constructs a `RecommendRecipeCommand` |
-| `RecommendRecipeCommand` | Executes the recommendation logic |
+| `Parser` | Parses raw input, selects the correct command variant, and validates format |
+| `RecommendByIngredientCommand` | Executes ingredient-based recommendation logic |
+| `RecommendByInventoryCommand` | Executes inventory-based recommendation logic |
+| `RecommendByMissingCommand` | Executes missing-based recommendation logic |
 | `Inventory` | Provides access to current ingredient stocks |
 | `RecipeBook` | Provides access to all known recipes |
 
-**Step-by-step execution:**
+**Ingredient-based mode — step-by-step execution:**
 
 1. The user enters `recommend-r n/<ingredient>`.
-2. `Parser.parse()` verifies the `n/` prefix and extracts the ingredient name. If the format is
-   invalid or the name is empty, an error is printed and a no-op `Command` is returned.
-3. A `RecommendRecipeCommand` is constructed with the ingredient name.
-4. `SudoCook` detects the command type and calls `cmd.execute(inventory, recipes)`.
-5. Inside `execute()`:
-    - The inventory is searched linearly for a case-insensitive match. The available quantity is recorded.
-    - If the ingredient is not found, `Ui.printError()` is called and execution stops.
-    - Otherwise, each recipe in `RecipeBook` is inspected. A recipe qualifies if it contains the
-      ingredient **and** requires a quantity ≤ the available amount.
-    - If no recipe qualifies, a "No recipes meet the requirement" message is printed; otherwise the
-      list of matching recipe names is printed.
+2. `Parser.parse()` detects the `n/` prefix, extracts the ingredient name, and constructs a
+   `RecommendByIngredientCommand`. If the format is invalid or the name is empty, an error is printed and
+   a no-op `Command` is returned.
+3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
+4. Inside `execute()`:
+   - The inventory is searched linearly for a case-insensitive name match. The available quantity
+     is recorded.
+   - If the ingredient is not found, `Ui.printError()` is called and execution stops.
+   - Otherwise, each recipe in `RecipeBook` is inspected. A recipe qualifies if it contains the
+     ingredient **and** requires a quantity ≤ the available amount.
+   - If no recipe qualifies, a "No recipes meet the requirement" message is printed; otherwise the
+     list of matching recipe names is printed.
 
-Key snippet from `RecommendRecipeCommand`:
+Key snippet from `RecommendByIngredientCommand`:
 
 ```text
   for (int i = 0; i < recipes.size(); i++) {
@@ -63,15 +87,123 @@ Key snippet from `RecommendRecipeCommand`:
 
   ---
 
-#### Sequence Diagram
+**Inventory-based mode — step-by-step execution:**
 
-![Recommend Recipe Sequence Diagram](team/RecommendSD-0.png)
+1. The user enters `recommend-r` (no arguments).
+2. `Parser.parse()` detects the absence of arguments and constructs a
+   `RecommendByInventoryCommand`.
+3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
+4. Inside `execute()`, each recipe is evaluated by `canMake(recipe, inventory)`:
+   - For every ingredient required by the recipe, the inventory is searched for a
+     case-insensitive name match.
+   - If the ingredient is absent or the available quantity is less than required, `canMake`
+     returns `false` and the recipe is excluded.
+   - If all ingredients pass, `canMake` returns `true` and the recipe is appended to the result.
+   - If no recipe is makeable, a "No recipes can be made" message is printed; otherwise the list of
+     makeable recipe names is printed.
 
-*Figure 1: Sequence Diagram for the `recommend-r` command*
+Key snippet from `RecommendByInventoryCommand`:
+
+```text
+  private boolean canMake(Recipe recipe, Inventory inventory) {
+      for (Ingredient required : recipe.getIngredients()) {
+          double available = -1;
+          for (int j = 0; j < inventory.size(); j++) {
+              Ingredient item = inventory.getIngredient(j);
+              if (item.getName().equalsIgnoreCase(required.getName())) {
+                  available = item.getQuantity();
+                  break;
+              }
+          }
+          if (available < required.getQuantity()) {
+              return false;
+          }
+      }
+      return true;
+  }
+```
+
+  ---
+
+**Missing-based mode — step-by-step execution:**
+
+1. The user enters `recommend-r missing/<N>`.
+2. `Parser.parse()` detects the `missing/` prefix, extracts and validates `N` as a positive integer,
+   and constructs a `RecommendByMissingCommand(N)`. If `N` is not a positive integer, an error is
+   printed and a no-op `Command` is returned.
+3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
+4. Inside `execute()`, each recipe is evaluated by `getMissingIngredients(recipe, inventory)`:
+   - For every ingredient required by the recipe, the inventory is searched for a case-insensitive
+     name match.
+   - If the ingredient is absent or the available quantity is less than required, the shortfall
+     (`required quantity − available quantity`) and unit are recorded.
+   - The method returns the list of formatted shortfall strings (e.g. `"Salt (1.0 g)"`).
+5. Back in `execute()`, the recipe is included in the output only if the number of missing items is
+   **between 1 and N** (inclusive). Recipes with zero missing items — i.e. fully makeable ones —
+   are always excluded.
+6. If no recipe qualifies, a "No recipes found" message is printed; otherwise the numbered list
+   with per-recipe shortfall details is printed.
+
+Key snippet from `RecommendByMissingCommand`:
+
+```text
+  private ArrayList<String> getMissingIngredients(Recipe recipe, Inventory inventory) {
+      ArrayList<String> missing = new ArrayList<>();
+      for (Ingredient required : recipe.getIngredients()) {
+          double available = 0;
+          for (int j = 0; j < inventory.size(); j++) {
+              Ingredient item = inventory.getIngredient(j);
+              if (item.getName().equalsIgnoreCase(required.getName())) {
+                  available = item.getQuantity();
+                  break;
+              }
+          }
+          if (available < required.getQuantity()) {
+              double shortfall = required.getQuantity() - available;
+              missing.add(required.getName() + " (" + shortfall + " " + required.getUnit() + ")");
+          }
+      }
+      return missing;
+  }
+```
+
+  ---
+
+#### Sequence Diagrams
+
+![Recommend Recipe Sequence Diagram](team/RecommendSD.png)
+
+*Figure 2: Sequence Diagram for `recommend-r n/INGREDIENT_NAME` (ingredient-based mode)*
+
+<br>
+<br>
+
+![Recommend By Inventory Sequence Diagram](team/RecommendByInventorySD.png)
+
+*Figure 3: Sequence Diagram for `recommend-r` (inventory-based mode)*
+
+<br>
+<br>
+
+![Recommend By Inventory Sequence Diagram](team/RecommendByMissingSD.png)
+
+*Figure 4: Sequence Diagram for `recommend-r missing/N` (missing-based mode)*
 
   ---
 
 #### Design Considerations
+
+**Aspect: Two modes under one command vs. separate commands**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Single `recommend-r` command with optional `n/` argument (current) | Consistent command prefix; easier to discover both modes via `help` | Slightly more complex parsing logic |
+| Separate commands (e.g. `recommend-r` and `recommend-all`) | Fully independent; no shared parsing | More commands for the user to remember |
+
+*Decision:* Keeping both modes under `recommend-r` provides a natural extension of the existing
+command and keeps the help output concise.
+
+  ---
 
 **Aspect: Case sensitivity of ingredient matching**
 
@@ -102,7 +234,10 @@ Key snippet from `RecommendRecipeCommand`:
 | Linear scan (current) | Simple; no extra data structure needed | O(n·m) where n = recipes, m = ingredients per recipe |
 | Pre-built index (ingredient → recipes) | O(1) lookup per ingredient | Added complexity; index must stay in sync |
 
-*Decision:* Linear scan is sufficient for the expected data sizes. An index can be introduced if performance becomes a concern.
+*Decision:* Linear scan is sufficient for the expected data sizes (daily record). The strategy may be further improved 
+if the product is extended to enterprises or larger groups.
+
+---
 
 ### `list-r` and `view-r` — Recipe Listing and Viewing
 
@@ -129,7 +264,7 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 | `Parser` | Detects `list-r` or `view-r` prefix and constructs the appropriate command |
 | `ListRecipeCommand` | Calls `RecipeBook.listRecipe()` |
 | `ViewRecipeCommand` | Calls `RecipeBook.viewRecipe()` or `RecipeBook.viewRecipe(index)` |
-| `RecipeBook` | Builds and prints the output string |
+| `RecipeBook` | Builds the output string and delegates display to `Ui` |
 
 **`list-r` execution:**
 
@@ -195,7 +330,8 @@ The feature involves four main classes:
 1. The user enters `cook <index>`.
 2. `Parser.parse()` detects the `cook` prefix, parses the recipe index, converts it from 1-based to
    0-based form, and constructs a `CookCommand`.
-3. If the index is not a valid number, an error is printed and a no-op `Command` is returned.
+3. If the index is missing or not a valid number, an error is printed and a no-op `Command` is
+   returned.
 4. `SudoCook` detects the command type, retrieves the target recipe using
    `recipes.getRecipe(cmd.getIndex())`, and calls `cmd.execute(recipe, inventory)`.
 5. Inside `execute()`:
@@ -231,7 +367,7 @@ Key snippet from `CookCommand`:
 
 ![Cook Sequence Diagram](team/cook.png)
 
-*Figure 2: Sequence Diagram for the `cook` command*
+*Figure 7: Sequence Diagram for the `cook` command*
 
   ---
 
@@ -316,7 +452,7 @@ Key snippet from `SortInventoryCommand`:
 
 ![Sort Inventory Sequence Diagram](team/SortInventory.png)
 
-*Figure 3: Sequence Diagram for the `sort-i` command*
+*Figure 8: Sequence Diagram for the `sort-i` command*
 
   ---
 
@@ -408,7 +544,7 @@ Key snippet from `ListIngredientCommand`:
 
 ![List Ingredients Sequence Diagram](team/ListIngredients.png)
 
-*Figure 4: Sequence Diagram for the `list-i` command*
+*Figure 9: Sequence Diagram for the `list-i` command*
 
   ---
 
@@ -571,7 +707,7 @@ Key snippet from `RecipeBook`:
 
 ![Filter Recipe Sequence Diagram](team/FilterRecipe.png)
 
-*Figure 9: Sequence Diagram for the `filter-r` command*
+*Figure 10: Sequence Diagram for the `filter-r` command*
 
 ---
 
@@ -652,7 +788,7 @@ Key snippet from `DeleteRecipeCommand`:
 
 ![Delete Recipe Sequence Diagram](team/DeleteRecipe.png)
 
-*Figure 10: Sequence Diagram for the `delete-r` command*
+*Figure 11: Sequence Diagram for the `delete-r` command*
 
 ---
 
@@ -709,9 +845,9 @@ The feature involves the following classes:
 | `Parser` | Detects the `search-r` or `search-i` prefix, extracts the query, and constructs the appropriate command |
 | `SearchRecipeCommand` | Calls `RecipeBook.searchRecipes(query)` |
 | `SearchIngredientCommand` | Calls `Inventory.searchIngredients(query)` |
-| `RecipeBook` | Iterates over recipes and prints those whose names pass `FuzzySearch.isMatch()` |
-| `Inventory` | Iterates over ingredients and prints those whose names pass `FuzzySearch.isMatch()` |
-| `FuzzySearch` | Stateless utility class that computes a fuzzy score between a query and a target string |
+| `RecipeBook` | Builds a list of recipe names, calls `FuzzySearch.rankMatchIndices()` to get matches ranked by score, and prints the results |
+| `Inventory` | Builds a list of ingredient names, calls `FuzzySearch.rankMatchIndices()` to get matches ranked by score, and prints the results |
+| `FuzzySearch` | Stateless utility class that computes a fuzzy score between a query and a target string, and returns match indices sorted by descending score |
 
 **Step-by-step execution (`search-r`):**
 
@@ -719,7 +855,7 @@ The feature involves the following classes:
 2. `Parser.parse()` detects the `search-r` prefix and extracts the query string. If it is empty, an error is printed and a no-op `Command` is returned.
 3. A `SearchRecipeCommand` is constructed with the query.
 4. `SudoCook` calls `cmd.execute(recipeBook)` (falls through to the default recipe routing branch).
-5. Inside `execute()`, `RecipeBook.searchRecipes(query)` iterates over all recipes and calls `FuzzySearch.isMatch(query, recipe.getName())` for each. Matching recipes are collected and printed.
+5. Inside `execute()`, `RecipeBook.searchRecipes(query)` builds a list of recipe names and calls `FuzzySearch.rankMatchIndices(query, names)`, which returns the indices of matching recipes sorted by descending score. Results are printed in ranked order (best match first).
 
 The `search-i` flow is identical, but targets `Inventory` and `SearchIngredientCommand`.
 
@@ -755,11 +891,11 @@ Key snippet from `FuzzySearch`:
 
 ![Search Recipe Sequence Diagram](team/SearchRecipe.png)
 
-*Figure 7: Sequence Diagram for the `search-r` command*
+*Figure 12: Sequence Diagram for the `search-r` command*
 
 ![Search Ingredient Sequence Diagram](team/SearchIngredient.png)
 
-*Figure 8: Sequence Diagram for the `search-i` command*
+*Figure 13: Sequence Diagram for the `search-i` command*
 
 ---
 
@@ -800,6 +936,57 @@ Key snippet from `FuzzySearch`:
 
 ---
 
+### `sort-r` — Sort Recipes
+
+#### Overview
+
+The `sort-r` command sorts all recipes in the recipe book by a user-specified criteria.
+
+**Command formats:**
+- `sort-r n/` — sort recipes alphabetically by name
+- `sort-r t/` — sort recipes by preparation time (ascending)
+- `sort-r c/` — sort recipes by calorie count (ascending)
+
+---
+
+#### Implementation
+
+The feature involves the following classes:
+
+| Class | Role |
+|---|---|
+| `Parser` | Detects the `sort-r` prefix, validates the criteria (`n/`, `t/`, `c/`), and constructs a `SortRecipeCommand` |
+| `SortRecipeCommand` | Stores the criteria and calls `RecipeBook.sortRecipes(criteria)` |
+| `RecipeBook` | Sorts the internal recipe list using a `Comparator` based on the criteria, then calls `listRecipe()` to display the result |
+
+**Step-by-step execution:**
+
+1. The user enters `sort-r <criteria>` (e.g. `sort-r t/`).
+2. `Parser.parse()` detects the `sort-r` prefix and extracts the criteria string. If the criteria is not one of `n/`, `t/`, or `c/`, an error is printed and a no-op `Command` is returned.
+3. A `SortRecipeCommand` is constructed with the validated criteria.
+4. `SudoCook` detects the command as a `SortRecipeCommand` and calls `cmd.execute(recipeBook)`.
+5. Inside `execute()`, `RecipeBook.sortRecipes(criteria)` sorts the internal list using the appropriate `Comparator`:
+    - `n/` → `Comparator.comparing(r -> r.getName().toLowerCase())`
+    - `t/` → `Comparator.comparingInt(Recipe::getTime)`
+    - `c/` → `Comparator.comparingInt(Recipe::getCalories)`
+6. After sorting, `listRecipe()` is called to display the updated recipe list.
+
+---
+
+#### Design Considerations
+
+**Aspect: Supporting multiple sort criteria vs. fixed sort order**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Multiple criteria via flag (e.g. `n/`, `t/`, `c/`) (current) | Flexible; users can sort by what matters to them | Slightly more complex parsing |
+| Fixed sort by name only | Simpler implementation | Less useful — users may want to find quick or low-calorie recipes |
+| Chained multi-criteria sort (e.g. `sort-r n/ t/`) | Maximum flexibility | Over-engineered for the current use case |
+
+*Decision:* A single criteria flag was chosen to balance flexibility with simplicity, mirroring the existing `filter-r` flag pattern already familiar to users.
+
+---
+
 ### `help` — Help Command
 
 #### Overview
@@ -835,7 +1022,7 @@ The `help` feature is implemented using a simple command pattern that bridges to
 
 ![Help Sequence Diagram](team/Help.png)
 
-*Figure 11: Sequence Diagram for the `help` command*
+*Figure 14: Sequence Diagram for the `help` command*
 
 ---
 
@@ -971,9 +1158,12 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 | v1.0 | User | Add a recipe | I don’t have to rely on my memory for instructions |
 | v1.0 | User | Delete a recipe | I can keep my recipe list clean and organized |
 | v2.0 | Budget-conscious Student | List all items sorted by their expiry dates | I can prioritize ingredients about to spoil and avoid wasting money |
-| v2.0 | Indecisive Student | Request recipe suggestions based on current stock | I don’t have to spend mental energy deciding what to cook |
+| v2.0 | Indecisive Student | Request recipe suggestions | I don’t have to spend mental energy deciding what to cook |
 | v2.0 | Power User | Mark a recipe as “cooked” to auto-deduct ingredients | My stock levels remain accurate with minimal manual adjustment |
 | v2.0 | Health-conscious Student | Filter recipes by calorie count | I can maintain nutritional goals without manual calculations |
+| v2.0 | Fast-typer | Use an "undo" command to revert the last change | I can quickly fix accidental deletions or typos |
+| v2.0 | Busy Student | Filter recipe suggestions by cooking time (e.g.< 15 mins) | I can prepare a meal that fits between my lectures |
+| v2.0 | Forgetful User | Use keyword or fuzzy search for ingredients/recipes | I can find items even if I don't remember the exact name |
 
 ## Non-Functional Requirements
 
@@ -997,5 +1187,9 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 4. **View recipe**: `view-r 1`. Verify full recipe details including calories are displayed.
 5. **Filter recipes**: `filter-r t/20`. Verify only recipes with time ≤ 20 are shown.
 6. **Filter by calories**: `filter-r c/300`. Verify only recipes with calories ≤ 300 are shown.
-7. **Delete a recipe**: `delete-r 1`. Verify the recipe is removed and `list-r` no longer shows it.
-8. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes are loaded.
+7. **Add an ingredient**: `add-i n/egg q/3 u/pcs`. Verify the ingredient is added with the correct details.
+8. **Ingredient-based recommendation**: `recommend-r n/egg`. Verify only recipes requiring enough eggs are displayed.
+9. **Inventory-based recommendation**: `recommend-r`. Verify only recipes can be made by using current stocks are displayed.
+10. **Missing-based recommendation**: `recommend-r missing/2`. Verify only recipes missing 2 or more ingredients are displayed.
+11. **Delete a recipe**: `delete-r 1`. Verify the recipe is removed and `list-r` no longer shows it.
+12. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes are loaded.

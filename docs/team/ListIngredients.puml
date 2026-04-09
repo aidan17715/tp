@@ -45,7 +45,8 @@ Inventory --> Cmd : ingredients
 deactivate Inventory
 
 alt expiry cutoff provided
-    Cmd -> Cmd : filter ingredients by expiry
+    Cmd -> Cmd : getIngredientsToDisplay(inventory, expiry)
+    Cmd --> Cmd : ingredients
 else no expiry cutoff
 end
 

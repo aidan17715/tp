@@ -54,7 +54,7 @@ public class DeleteIngredientCommand extends Command {
             indexToRemove = inventory.findIndexByName(nameOrIndex);
         }
 
-        if (indexToRemove < 0 || indexToRemove >= inventory.size()) {
+        if (indexToRemove < 0 || indexToRemove >= inventory.getSize()) {
             Ui.printError("Ingredient not found in inventory.");
             return;
         }

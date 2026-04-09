@@ -1,5 +1,9 @@
 package seedu.sudocook;
 
+/**
+ * Command to recommend recipes whose full ingredient list
+ * can be satisfied by the current inventory.
+ */
 public class RecommendByInventoryCommand extends Command {
 
     public RecommendByInventoryCommand() {
@@ -11,7 +15,7 @@ public class RecommendByInventoryCommand extends Command {
         StringBuilder sb = new StringBuilder();
         int count = 0;
 
-        for (int i = 0; i < recipes.size(); i++) {
+        for (int i = 0; i < recipes.getSize(); i++) {
             Recipe recipe = recipes.getRecipe(i);
             if (canMake(recipe, inventory)) {
                 count++;
@@ -29,7 +33,7 @@ public class RecommendByInventoryCommand extends Command {
     private boolean canMake(Recipe recipe, Inventory inventory) {
         for (Ingredient required : recipe.getIngredients()) {
             double available = -1;
-            for (int j = 0; j < inventory.size(); j++) {
+            for (int j = 0; j < inventory.getSize(); j++) {
                 Ingredient item = inventory.getIngredient(j);
                 if (item.getName().equalsIgnoreCase(required.getName())) {
                     available = item.getQuantity();

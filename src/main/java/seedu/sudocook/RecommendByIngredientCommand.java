@@ -1,5 +1,9 @@
 package seedu.sudocook;
 
+/**
+ * Command to recommend recipes that use a specified ingredient,
+ * provided the inventory holds sufficient quantity of it.
+ */
 public class RecommendByIngredientCommand extends Command {
     private final String ingredientName;
 
@@ -11,7 +15,7 @@ public class RecommendByIngredientCommand extends Command {
     @Override
     public void execute(Inventory inventory, RecipeBook recipes) {
         double amount = -1;
-        for (int i = 0; i < inventory.size(); i++) {
+        for (int i = 0; i < inventory.getSize(); i++) {
             Ingredient ingredient = inventory.getIngredient(i);
             if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
                 amount = ingredient.getQuantity();
@@ -23,7 +27,7 @@ public class RecommendByIngredientCommand extends Command {
         }
         StringBuilder sb = new StringBuilder();
         int count = 0;
-        for (int i = 0; i < recipes.size(); i++) {
+        for (int i = 0; i < recipes.getSize(); i++) {
             Recipe recipe = recipes.getRecipe(i);
             for (Ingredient ing : recipe.getIngredients()) {
                 if (ing.getName().equalsIgnoreCase(ingredientName) && ing.getQuantity() <= amount) {

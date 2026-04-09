@@ -29,19 +29,25 @@ public class HelpCommand extends Command {
             "   Purpose : Shows full details of all recipes, or a specific recipe by index.\n" +
             "   Example : view-r 1\n\n" +
             "3. Add Recipe\n" +
-            "   Command : add-r {NAME} i/{INGREDIENTS} s/{STEPS} t/{TIME_IN_MINUTES}\n" +
-            "   Example : add-r {Fried Rice} i/rice 2 cups egg 2 pcs soy_sauce 1 tbsp\n" +
-            "             s/{Cook rice} {Fry eggs} {Mix} t/15\n\n" +
+            "   Command : add-r {NAME} i/{INGREDIENTS} s/{STEPS} t/{TIME_IN_MINUTES} c/{CALORIES}\n" +
+            "   Example : add-r {Fried Rice} i/rice 2 cups egg 2 pcs {soy sauce} 1 tbsp\n" +
+            "             s/{Cook rice} {Fry eggs} {Mix} t/15 c/450\n\n" +
             "4. Delete Recipe\n" +
             "   Command : delete-r {INDEX}\n" +
             "   Example : delete-r 1\n\n" +
             "5. Filter Recipes\n" +
-            "   Command : filter-r t/{MAX_TIME_IN_MINUTES}\n" +
-            "   Example : filter-r t/30\n\n" +
+            "   Command : filter-r [t/{MAX_TIME_IN_MINUTES}] [c/{MAX_CALORIES}]\n" +
+            "   Example : filter-r t/30\n" +
+            "   Example : filter-r c/500\n" +
+            "   Example : filter-r t/30 c/500\n\n" +
             "5a. Search Recipes (Fuzzy)\n" +
             "   Command : search-r {QUERY}\n" +
             "   Example : search-r fried rice\n" +
             "   Purpose : Fuzzy search recipes by name (handles typos and partial matches).\n\n" +
+            "5b. Cook Recipe\n" +
+            "   Command : cook {INDEX}\n" +
+            "   Example : cook 1\n" +
+            "   Purpose : Uses ingredients from inventory to cook the selected recipe.\n\n" +
             "6. Recommend Recipes\n" +
             "   Command : recommend-r [n/{INGREDIENT_NAME}]\n" +
             "   Example : recommend-r n/egg\n" +
@@ -57,19 +63,28 @@ public class HelpCommand extends Command {
             "   Example : list-i ex/2026-04-01\n" +
             "   Purpose : Shows all ingredients, or only those expiring before the given date.\n\n" +
             "8. Add Ingredient\n" +
-            "   Command : add-i n/{NAME} q/{QUANTITY} u/{UNIT}\n" +
-            "   Example : add-i n/Apple q/5 u/pcs\n\n" +
+            "   Command : add-i n/{NAME} q/{QUANTITY} u/{UNIT} [ex/{YYYY-MM-DD}]\n" +
+            "   Example : add-i n/Apple q/5 u/pcs\n" +
+            "   Example : add-i n/Milk q/1 u/carton ex/2026-04-10\n\n" +
             "9. Delete Ingredient\n" +
-            "   Command : delete-i {INDEX/NAME} [{QUANTITY}]\n" +
-            "   Example : delete-i Apple (Deletes all Apples)\n" +
-            "   Example : delete-i Apple 2 (Deletes 2 Apples)\n\n" +
+            "   Command : delete-i {INDEX|NAME} [{QUANTITY}]\n" +
+            "   Example : delete-i 1\n" +
+            "   Example : delete-i Apple\n" +
+            "   Example : delete-i Apple 2\n" +
+            "   Purpose : Deletes the indexed ingredient, or the first ingredient matching the name.\n\n" +
             "9a. Search Ingredients (Fuzzy)\n" +
             "   Command : search-i {QUERY}\n" +
             "   Example : search-i tomato\n" +
             "   Purpose : Fuzzy search ingredients by name (handles typos and partial matches).\n\n" +
+            "9b. Sort Ingredients\n" +
+            "   Command : sort-i\n" +
+            "   Purpose : Sorts inventory by expiry date, with items without expiry shown last.\n\n" +
             "OTHER:\n" +
             "--------------------------------------------------------\n" +
-            "10. Exit\n" +
+            "10. Help\n" +
+            "   Command : help\n" +
+            "   Purpose : Displays this help guide.\n\n" +
+            "11. Exit\n" +
             "   Command : bye\n" +
             "   Purpose : Exits SudoCook.\n\n" +
             "========================================================";

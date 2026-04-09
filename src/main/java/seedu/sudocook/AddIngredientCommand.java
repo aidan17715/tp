@@ -56,14 +56,31 @@ public class AddIngredientCommand extends Command {
         assert inventory != null : "Inventory must not be null";
         assert name != null && !name.isEmpty() : "Ingredient name must not be empty";
         assert quantity > 0 : "Ingredient quantity must be positive";
-        
+
         Ingredient ingredient;
         if (expiryDate != null) {
             ingredient = new Ingredient(name, quantity, unit, expiryDate);
         } else {
             ingredient = new Ingredient(name, quantity, unit);
         }
+        propagateExpiryDateToMatchingIngredient(inventory);
         inventory.addIngredient(ingredient);
         Ui.printMessage("Added: " + ingredient);
+    }
+
+    private void propagateExpiryDateToMatchingIngredient(Inventory inventory) {
+        if (expiryDate == null) {
+            return;
+        }
+
+        for (int i = 0; i < inventory.getSize(); i++) {
+            Ingredient existing = inventory.getIngredient(i);
+            if (existing.getName().equalsIgnoreCase(name)
+                    && existing.getUnit().equalsIgnoreCase(unit)
+                    && existing.getExpiryDate() == null) {
+                existing.setExpiryDate(expiryDate);
+                return;
+            }
+        }
     }
 }

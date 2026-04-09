@@ -1,6 +1,7 @@
 package seedu.sudocook;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class RecipeBook {
     private ArrayList<Recipe> recipes;
@@ -14,18 +15,17 @@ public class RecipeBook {
             throw new IndexOutOfBoundsException("The recipe book is currently empty.");
         }
         if (index < 1 || index > recipes.size()) {
-            throw new IndexOutOfBoundsException(
-                    "Index " + index + " is out of range. (Valid range: 1 to " + recipes.size() + ")"
-            );
+            throw new IndexOutOfBoundsException("Index " + index
+                    + " is out of range. (Valid range: 1 to " + recipes.size() + ")");
         }
         recipes.remove(index - 1);
     }
 
-    public Recipe getRecipe(int i){
+    public Recipe getRecipe(int index){
 
         try {
-            return recipes.get(i);
-        } catch (IndexOutOfBoundsException e) {
+            return recipes.get(index);
+        } catch (IndexOutOfBoundsException exception) {
             Ui.printError("Index out of bounds");
             return null;
         }
@@ -36,14 +36,14 @@ public class RecipeBook {
             Ui.printMessage("No recipes found.");
             return;
         }
-        StringBuilder sb = new StringBuilder();
+        StringBuilder recipeListBuilder = new StringBuilder();
         for (int i = 0; i < recipes.size(); i++) {
-            sb.append(i + 1).append(". ").append(recipes.get(i).getName());
+            recipeListBuilder.append(i + 1).append(". ").append(recipes.get(i).getName());
             if (i < recipes.size() - 1) {
-                sb.append("\n");
+                recipeListBuilder.append("\n");
             }
         }
-        Ui.printGradientMessage(sb.toString());
+        Ui.printGradientMessage(recipeListBuilder.toString());
     }
 
     public void viewRecipe() {
@@ -51,14 +51,14 @@ public class RecipeBook {
             Ui.printMessage("No recipes found.");
             return;
         }
-        StringBuilder sb = new StringBuilder();
+        StringBuilder recipeListBuilder = new StringBuilder();
         for (int i = 0; i < recipes.size(); i++) {
-            sb.append(i + 1).append(". ").append(recipes.get(i).toString().stripLeading());
+            recipeListBuilder.append(i + 1).append(". ").append(recipes.get(i).toString().stripLeading());
             if (i < recipes.size() - 1) {
-                sb.append("\n");
+                recipeListBuilder.append("\n");
             }
         }
-        Ui.printGradientMessage(sb.toString());
+        Ui.printGradientMessage(recipeListBuilder.toString());
     }
 
     public void viewRecipe(int index) {
@@ -86,32 +86,33 @@ public class RecipeBook {
     }
 
     public void filterRecipes(Integer maxTime, Integer maxCalories) {
-        ArrayList<Recipe> filtered = new ArrayList<>();
-        for (Recipe r : recipes) {
-            boolean keep = true;
-            if (maxTime != null && r.getTime() > maxTime) {
-                keep = false;
+        ArrayList<Recipe> filteredRecipes = new ArrayList<>();
+        for (Recipe recipe : recipes) {
+            boolean shouldKeepRecipe = true;
+            if (maxTime != null && recipe.getTime() > maxTime) {
+                shouldKeepRecipe = false;
             }
-            if (maxCalories != null && r.getCalories() > maxCalories) {
-                keep = false;
+            if (maxCalories != null && recipe.getCalories() > maxCalories) {
+                shouldKeepRecipe = false;
             }
-            if (keep) {
-                filtered.add(r);
+            if (shouldKeepRecipe) {
+                filteredRecipes.add(recipe);
             }
         }
         
-        if (filtered.isEmpty()) {
+        if (filteredRecipes.isEmpty()) {
             Ui.printMessage("No recipes found matching the criteria.");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < filtered.size(); i++) {
-            sb.append(i + 1).append(". ").append(filtered.get(i).toString().stripLeading());
-            if (i < filtered.size() - 1) {
-                sb.append("\n");
+        StringBuilder filteredRecipesBuilder = new StringBuilder();
+        for (int i = 0; i < filteredRecipes.size(); i++) {
+            filteredRecipesBuilder.append(i + 1).append(". ")
+                    .append(filteredRecipes.get(i).toString().stripLeading());
+            if (i < filteredRecipes.size() - 1) {
+                filteredRecipesBuilder.append("\n");
             }
         }
-        Ui.printGradientMessage(sb.toString());
+        Ui.printGradientMessage(filteredRecipesBuilder.toString());
     }
 
     public void searchRecipes(String query) {
@@ -119,23 +120,50 @@ public class RecipeBook {
             Ui.printMessage("No recipes found.");
             return;
         }
+        ArrayList<String> names = new ArrayList<>();
+        for (Recipe recipe : recipes) {
+            names.add(recipe.getName());
+        }
+        ArrayList<Integer> rankedIndices = FuzzySearch.rankMatchIndices(query, names);
+        if (rankedIndices.isEmpty()) {
+            Ui.printMessage("No recipes matched \"" + query + "\".");
+            return;
+        }
         StringBuilder sb = new StringBuilder();
-        int count = 0;
-        for (int i = 0; i < recipes.size(); i++) {
-            if (FuzzySearch.isMatch(query, recipes.get(i).getName())) {
-                count++;
-                sb.append(i + 1).append(". ").append(recipes.get(i).getName()).append("\n");
+        for (int i = 0; i < rankedIndices.size(); i++) {
+            int idx = rankedIndices.get(i);
+            sb.append(idx + 1).append(". ").append(recipes.get(idx).getName());
+            if (i < rankedIndices.size() - 1) {
+                sb.append("\n");
             }
         }
-        if (count == 0) {
-            Ui.printMessage("No recipes matched \"" + query + "\".");
-        } else {
-            Ui.printGradientMessage("Found " + count + " recipe(s) matching \""
-                    + query + "\":\n" + sb.toString().stripTrailing());
-        }
+        Ui.printGradientMessage("Found " + rankedIndices.size() + " recipe(s) matching \""
+                + query + "\":\n" + sb.toString());
     }
 
-    public int size(){
+    public void sortRecipes(String criteria) {
+        if (recipes.isEmpty()) {
+            Ui.printMessage("No recipes to sort.");
+            return;
+        }
+        switch (criteria) {
+        case "n/":
+            recipes.sort(Comparator.comparing(r -> r.getName().toLowerCase()));
+            break;
+        case "t/":
+            recipes.sort(Comparator.comparingInt(Recipe::getTime));
+            break;
+        case "c/":
+            recipes.sort(Comparator.comparingInt(Recipe::getCalories));
+            break;
+        default:
+            Ui.printError("Unknown sort criteria. Use: sort-r n/ | t/ | c/");
+            return;
+        }
+        listRecipe();
+    }
+
+    public int getSize(){
         return recipes.size();
     }
 

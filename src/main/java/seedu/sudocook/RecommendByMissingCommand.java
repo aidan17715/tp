@@ -2,6 +2,10 @@ package seedu.sudocook;
 
 import java.util.ArrayList;
 
+/**
+ * Command to recommend recipes that are missing at most N ingredients,
+ * showing the exact shortfall for each missing ingredient.
+ */
 public class RecommendByMissingCommand extends Command {
     private final int maxMissing;
 
@@ -15,7 +19,7 @@ public class RecommendByMissingCommand extends Command {
         StringBuilder sb = new StringBuilder();
         int count = 0;
 
-        for (int i = 0; i < recipes.size(); i++) {
+        for (int i = 0; i < recipes.getSize(); i++) {
             Recipe recipe = recipes.getRecipe(i);
             ArrayList<String> missing = getMissingIngredients(recipe, inventory);
             if (missing.size() > 0 && missing.size() <= maxMissing) {
@@ -36,7 +40,7 @@ public class RecommendByMissingCommand extends Command {
         ArrayList<String> missing = new ArrayList<>();
         for (Ingredient required : recipe.getIngredients()) {
             double available = 0;
-            for (int j = 0; j < inventory.size(); j++) {
+            for (int j = 0; j < inventory.getSize(); j++) {
                 Ingredient item = inventory.getIngredient(j);
                 if (item.getName().equalsIgnoreCase(required.getName())) {
                     available = item.getQuantity();

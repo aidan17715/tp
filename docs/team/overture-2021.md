@@ -1,4 +1,4 @@
-# Cui Jiahao - Project Portfolio Page
+ui Jiahao - Project Portfolio Page
 
 ## Overview
 **SudoCook** is a Java-based Command-Line Interface (CLI) application designed to help users manage recipes and kitchen
@@ -13,6 +13,11 @@ through an intuitive text interface.
 #### Enhancements Implemented
 - Initialized the command architecture with `Command`, `ListCommand`, `DeleteCommand`, and `AddRecipeCommand`
 - Implement `add-r` command: enables adding recipes through the user interface, and write corresponding tests
-- Contribution to the DG: `sort-i`, `cook`, `list-r` commands, drew sequence diagrams: [list-i](ListIngredients.png), [sort-i](SortInventory.png), [cook](cook.png)
-- Contributions to team-based tasks: set up the github organization and forked the repository.
-- Review/mentoring: led the division of tasks in a manner that reduces temporal and interpersonal dependency (so that, ideally, work related to the same functional code only done by one person in a week, a team member doesn't need to wait until another member has finished, and everyone has roughly equal workload).
+- Revise help command accordingly.
+- Implement expiry date propagation when running add-i on an ingredient previously not posessing an expiry date.
+- Fix bug: add-i rejects valid ingredient names containing lowercase q.
+- Contribution to the DG: `sort-i`, `cook`, `list-r` commands, drew sequence diagrams: [list-i](ListIngredients.png), [sort-i](SortInventory.png), [cook](cook.png), draw Architecture Diagram
+
+#### Contributions to team-based tasks
+- Set up the github organization and forked the repository.
+- Led the division of tasks in a manner that reduces temporal and interpersonal dependency (so that, ideally, work related to the same functional code only done by one person in a week, a team member doesn't need to wait until another member has finished, and everyone has roughly equal workload).

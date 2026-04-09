@@ -7,4 +7,5 @@ filter recipes based on preparation time and calorie count — all through an in
 Useful links:
 * [User Guide](UserGuide.md)
 * [Developer Guide](DeveloperGuide.md)
+* [Architecture](Architecture.md)
 * [About Us](AboutUs.md)

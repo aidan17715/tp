@@ -50,7 +50,7 @@ public class CookTest {
         Command cmd = parser.parse("cook 1");
         executeCookCommand(cmd);
 
-        assertEquals(2, ingredients.size());
+        assertEquals(2, ingredients.getSize());
         assertEquals(1.0, ingredients.getIngredient(ingredients.findIndexByName("Water")).getQuantity());
         assertEquals(0.5, ingredients.getIngredient(ingredients.findIndexByName("Sugar")).getQuantity());
         assertTrue(getOutput().contains("Oops! Not enough ingredients"));
@@ -65,13 +65,29 @@ public class CookTest {
     }
 
     @Test
+    public void parse_missingIndex_returnsNoOpCommand() {
+        Command cmd = parser.parse("cook");
+
+        assertEquals(Command.class, cmd.getClass());
+        assertTrue(getOutput().contains("Oops! You should indicate the index of the recipe when cooking!"));
+    }
+
+    @Test
+    public void parse_prefixedKeyword_returnsNoOpCommand() {
+        Command cmd = parser.parse("cookbook 1");
+
+        assertEquals(Command.class, cmd.getClass());
+        assertTrue(getOutput().contains("Oops! I don't recognise that command!"));
+    }
+
+    @Test
     public void execute_indexOutOfBounds_printsErrorAndDoesNotChangeInventory() {
         ingredients.addIngredient(new Ingredient("Water", 1, "Liter"));
 
         Command cmd = parser.parse("cook 2");
         executeCookCommand(cmd);
 
-        assertEquals(1, ingredients.size());
+        assertEquals(1, ingredients.getSize());
         assertEquals(1.0, ingredients.getIngredient(0).getQuantity());
         assertTrue(getOutput().contains("Oops! Index out of bounds"));
     }
@@ -84,7 +100,7 @@ public class CookTest {
         Command cmd = parser.parse("cook 1");
         executeCookCommand(cmd);
 
-        assertEquals(0, ingredients.size());
+        assertEquals(0, ingredients.getSize());
     }
 
     private void executeCookCommand(Command cmd) {

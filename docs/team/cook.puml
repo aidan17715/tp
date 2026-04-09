@@ -21,7 +21,7 @@ SudoCook -> Parser : parse(input)
 activate Parser
 
 create Cmd
-Parser -> Cmd ** : CookCommand
+Parser -> Cmd ** : CookCommand(false, index)
 activate Cmd
 Cmd --> Parser
 deactivate Cmd
@@ -31,32 +31,49 @@ deactivate Parser
 
 SudoCook -> RecipeBook : getRecipe(index)
 activate RecipeBook
-RecipeBook --> SudoCook : recipe
+alt index out of bounds
+    RecipeBook -> Ui : printError("Index out of bounds")
+    activate Ui
+    Ui --> RecipeBook
+    deactivate Ui
+    RecipeBook --> SudoCook : null
+else recipe found
+    RecipeBook --> SudoCook : recipe
+end
 deactivate RecipeBook
 
 SudoCook -> Cmd : execute(recipe, inventory)
 activate Cmd
 
-Cmd -> Inventory : check required ingredients
-activate Inventory
-Inventory --> Cmd
-deactivate Inventory
-
-alt ingredients available
-    Cmd -> Inventory : remove used ingredients
+alt recipe == null
+    Cmd --> SudoCook
+else recipe exists
+    Cmd -> Inventory : findIndexByName(name)
     activate Inventory
     Inventory --> Cmd
     deactivate Inventory
 
-    Cmd -> Ui : show success message
-    activate Ui
-    Ui --> Cmd
-    deactivate Ui
-else ingredients missing
-    Cmd -> Ui : show error message
-    activate Ui
-    Ui --> Cmd
-    deactivate Ui
+    Cmd -> Inventory : getIngredient(index).getQuantity()
+    activate Inventory
+    Inventory --> Cmd
+    deactivate Inventory
+
+    alt ingredients available
+        Cmd -> Inventory : updateQuantity(...) / removeIngredient(...)
+        activate Inventory
+        Inventory --> Cmd
+        deactivate Inventory
+
+        Cmd -> Ui : printMessage(...)
+        activate Ui
+        Ui --> Cmd
+        deactivate Ui
+    else ingredients missing
+        Cmd -> Ui : printError(...)
+        activate Ui
+        Ui --> Cmd
+        deactivate Ui
+    end
 end
 
 SudoCook <-- Cmd

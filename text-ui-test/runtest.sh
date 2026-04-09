@@ -7,6 +7,8 @@ cd ..
 ./gradlew clean shadowJar
 
 cd text-ui-test
+# Reset persisted app state so repeated test runs remain deterministic.
+rm -f data/recipes.json data/inventory.json
 
 java -ea -jar $(find ../build/libs/ -mindepth 1 -print -quit) < input.txt > ACTUAL.TXT
 
