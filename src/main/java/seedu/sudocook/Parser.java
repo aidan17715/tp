@@ -252,6 +252,12 @@ public class Parser {
         String timeInput = addRecipeMatcher.group(4).trim();
         String calorieInput = addRecipeMatcher.group(5).trim();
 
+        if (name.trim().isEmpty()) {
+            Ui.printError("Recipe name and steps cannot be empty.");
+            logger.log(Level.INFO, "Caught invalid add-r command format in required text fields");
+            return new Command(false);
+        }
+
         int time;
         int calories;
         try {
@@ -302,7 +308,19 @@ public class Parser {
 
         Matcher stepMatcher = tokenPattern.matcher(stepInput);
         while (stepMatcher.find()) {
-            steps.add(stripOptionalBraces(stepMatcher.group()));
+            String step = stripOptionalBraces(stepMatcher.group());
+            if (step.trim().isEmpty()) {
+                Ui.printError("Recipe name and steps cannot be empty.");
+                logger.log(Level.INFO, "Caught invalid add-r command format in required text fields");
+                return new Command(false);
+            }
+            steps.add(step);
+        }
+
+        if (steps.isEmpty()) {
+            Ui.printError("Recipe name and steps cannot be empty.");
+            logger.log(Level.INFO, "Caught invalid add-r command format in required text fields");
+            return new Command(false);
         }
 
         return new AddRecipeCommand(name, ingredients, steps, time, calories);
