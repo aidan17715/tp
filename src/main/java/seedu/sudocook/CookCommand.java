@@ -1,6 +1,7 @@
 package seedu.sudocook;
 
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +24,8 @@ public class CookCommand extends Command {
             return;
         }
         try {
-            for (Ingredient i : recipe.getIngredients()) {
+            ArrayList<Ingredient> ingredientRequirements = IngredientRequirements.aggregateFor(recipe);
+            for (Ingredient i : ingredientRequirements) {
                 int ingredientIndex = inventory.findIndexByName(i.getName());
                 if (ingredientIndex < 0
                         || inventory.getIngredient(ingredientIndex).getQuantity() < i.getQuantity()) {
@@ -32,11 +34,11 @@ public class CookCommand extends Command {
                 }
             }
 
-            for (Ingredient i : recipe.getIngredients()) {
+            for (Ingredient i : ingredientRequirements) {
                 Command c = new DeleteIngredientCommand(i.getName(), i.getQuantity());
                 c.execute(inventory);
             }
-            Ui.printMessage("Cooked Recipe" + recipe.getName());
+            Ui.printMessage("Cooked Recipe " + recipe.getName());
         } catch (RuntimeException e) {
             Ui.printError("Not enough ingredients");
         }

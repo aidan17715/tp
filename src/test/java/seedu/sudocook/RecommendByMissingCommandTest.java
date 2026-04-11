@@ -108,6 +108,27 @@ public class RecommendByMissingCommandTest {
     }
 
     @Test
+    public void execute_duplicateIngredientRequirements_showsAggregatedShortfall() {
+        ArrayList<Ingredient> doubleEggIngredients = new ArrayList<>();
+        doubleEggIngredients.add(new Ingredient("Egg", 1, "pcs"));
+        doubleEggIngredients.add(new Ingredient("egg", 1, "pcs"));
+        ArrayList<String> doubleEggSteps = new ArrayList<>();
+        doubleEggSteps.add("Cook");
+        recipes.addRecipe(new Recipe("DoubleEgg", doubleEggIngredients, doubleEggSteps, 5));
+        inventory.addIngredient(new Ingredient("Egg", 1, "pcs"));
+        inventory.addIngredient(new Ingredient("Salt", 2, "g"));
+        output.reset();
+
+        new RecommendByMissingCommand(1).execute(inventory, recipes);
+
+        String out = getOutput();
+        assertTrue(out.contains("DoubleEgg"));
+        assertTrue(out.contains("Egg"));
+        assertTrue(out.contains("1.0"));
+        assertTrue(out.contains("pcs"));
+    }
+
+    @Test
     public void execute_noQualifyingRecipes_printsNoMatch() {
         // Empty inventory: Omelette missing 2, Pasta missing 3 — missing/0 finds nothing
         new RecommendByMissingCommand(0).execute(inventory, recipes);

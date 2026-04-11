@@ -33,6 +33,34 @@ public class AddRecipeCommandTest {
     }
 
     @Test
+    public void addCommand_existingNameCaseInsensitive_overwritesOriginalRecipe() {
+        ArrayList<Ingredient> originalIngredients = new ArrayList<>();
+        originalIngredients.add(new Ingredient("Rice", 2, "cups"));
+        ArrayList<String> originalSteps = new ArrayList<>();
+        originalSteps.add("Cook rice");
+
+        AddRecipeCommand original = new AddRecipeCommand("Fried Rice", originalIngredients, originalSteps, 15, 400);
+        original.execute(testRecipeBook);
+
+        ArrayList<Ingredient> replacementIngredients = new ArrayList<>();
+        replacementIngredients.add(new Ingredient("Noodles", 1, "packet"));
+        ArrayList<String> replacementSteps = new ArrayList<>();
+        replacementSteps.add("Boil noodles");
+
+        AddRecipeCommand replacement = new AddRecipeCommand("fried rice", replacementIngredients, replacementSteps,
+                5, 350);
+        replacement.execute(testRecipeBook);
+
+        Recipe savedRecipe = testRecipeBook.getRecipe(0);
+        assertEquals(1, testRecipeBook.getSize());
+        assertEquals("fried rice", savedRecipe.getName());
+        assertEquals("Noodles", savedRecipe.getIngredients().get(0).getName());
+        assertEquals("Boil noodles", savedRecipe.getSteps().get(0));
+        assertEquals(5, savedRecipe.getTime());
+        assertEquals(350, savedRecipe.getCalories());
+    }
+
+    @Test
     public void formatErrorTest() {
         String testCmd = "add-r Gibberish Gibberish";
         Ui ui = new Ui();
@@ -55,6 +83,16 @@ public class AddRecipeCommandTest {
         cmd.execute(testRecipeBook);
         assertEquals(1, testRecipeBook.getSize());
 
+    }
+
+    @Test
+    public void parserTest_emptyRecipeName_rejected() {
+        assertInvalidRecipeText("add-r {} i/salt 1 g s/{Add salt.} t/10 c/100");
+    }
+
+    @Test
+    public void parserTest_emptyRecipeStep_rejected() {
+        assertInvalidRecipeText("add-r {Salt Mix} i/salt 1 g s/{} t/10 c/100");
     }
 
     @Test
@@ -83,6 +121,25 @@ public class AddRecipeCommandTest {
             assertEquals(0, testRecipeBook.getSize());
             assertTrue(output.toString(StandardCharsets.UTF_8)
                     .contains("Oops! Invalid ingredient quantity in add-r format."));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    private void assertInvalidRecipeText(String testCmd) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+
+        try {
+            Ui ui = new Ui();
+            Parser parser = new Parser(ui);
+            Command cmd = parser.parse(testCmd);
+            cmd.execute(testRecipeBook);
+
+            assertEquals(0, testRecipeBook.getSize());
+            assertTrue(output.toString(StandardCharsets.UTF_8)
+                    .contains("Oops! Recipe name and steps cannot be empty."));
         } finally {
             System.setOut(originalOut);
         }

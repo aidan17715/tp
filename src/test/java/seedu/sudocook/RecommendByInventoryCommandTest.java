@@ -78,6 +78,23 @@ public class RecommendByInventoryCommandTest {
     }
 
     @Test
+    public void execute_duplicateIngredientRequirementsInsufficient_recipeExcluded() {
+        ArrayList<Ingredient> doubleEggIngredients = new ArrayList<>();
+        doubleEggIngredients.add(new Ingredient("Egg", 1, "pcs"));
+        doubleEggIngredients.add(new Ingredient("egg", 1, "pcs"));
+        ArrayList<String> doubleEggSteps = new ArrayList<>();
+        doubleEggSteps.add("Cook");
+        recipes.addRecipe(new Recipe("DoubleEgg", doubleEggIngredients, doubleEggSteps, 5));
+        inventory.addIngredient(new Ingredient("egg", 1, "pcs"));
+        output.reset();
+
+        new RecommendByInventoryCommand().execute(inventory, recipes);
+
+        String out = getOutput();
+        assertTrue(!out.contains("DoubleEgg"));
+    }
+
+    @Test
     public void execute_missingOneIngredient_recipeExcluded() {
         // Has Water but no Sugar
         inventory.addIngredient(new Ingredient("Water", 2, "Liter"));

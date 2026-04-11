@@ -107,6 +107,25 @@ public class RecommendByIngredientCommandTest {
         assertTrue(getOutput().contains("No recipes"));
     }
 
+    @Test
+    public void execute_duplicateIngredientRequirementsInsufficient_printsNoMatch() {
+        ArrayList<Ingredient> doubleSugarIngredients = new ArrayList<>();
+        doubleSugarIngredients.add(new Ingredient("Sugar", 1, "mg"));
+        doubleSugarIngredients.add(new Ingredient("sugar", 1, "mg"));
+        ArrayList<String> doubleSugarSteps = new ArrayList<>();
+        doubleSugarSteps.add("Cook");
+        recipes.addRecipe(new Recipe("DoubleSugar", doubleSugarIngredients, doubleSugarSteps, 5));
+        inventory.addIngredient(new Ingredient("Sugar", 1, "mg"));
+        output.reset();
+
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Sugar");
+        cmd.execute(inventory, recipes);
+
+        String out = getOutput();
+        assertTrue(out.contains("Mixue"));
+        assertTrue(!out.contains("DoubleSugar"));
+    }
+
     private String getOutput() {
         return output.toString(StandardCharsets.UTF_8)
                 .replaceAll("\u001B\\[[;\\d]*m", "");

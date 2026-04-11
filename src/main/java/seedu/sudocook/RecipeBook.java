@@ -76,6 +76,13 @@ public class RecipeBook {
     public void addRecipe(String name, ArrayList<Ingredient> ingredients,
             ArrayList<String> steps, int time, int calories) {
         Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
+        for (int i = 0; i < recipes.size(); i++) {
+            if (recipes.get(i).getName().equalsIgnoreCase(name)) {
+                recipes.set(i, newRecipe);
+                Ui.printGradientMessage("Added recipe:\n" + newRecipe.toString());
+                return;
+            }
+        }
         recipes.add(newRecipe);
         Ui.printGradientMessage("Added recipe:\n" + newRecipe.toString());
     }
