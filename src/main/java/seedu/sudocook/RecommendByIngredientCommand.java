@@ -29,7 +29,7 @@ public class RecommendByIngredientCommand extends Command {
         int count = 0;
         for (int i = 0; i < recipes.getSize(); i++) {
             Recipe recipe = recipes.getRecipe(i);
-            for (Ingredient ing : recipe.getIngredients()) {
+            for (Ingredient ing : IngredientRequirements.aggregateFor(recipe)) {
                 if (ing.getName().equalsIgnoreCase(ingredientName) && ing.getQuantity() <= amount) {
                     count += 1;
                     sb.append(count).append(". ").append(recipe.getName()).append("\n");

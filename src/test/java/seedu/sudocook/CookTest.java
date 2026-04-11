@@ -58,6 +58,26 @@ public class CookTest {
     }
 
     @Test
+    public void execute_duplicateIngredientRequirementsInsufficient_printsErrorAndLeavesInventoryUntouched() {
+        ArrayList<Ingredient> doubleEggIngredients = new ArrayList<>();
+        doubleEggIngredients.add(new Ingredient("Egg", 1, "pcs"));
+        doubleEggIngredients.add(new Ingredient("egg", 1, "pcs"));
+        ArrayList<String> doubleEggSteps = new ArrayList<>();
+        doubleEggSteps.add("Cook");
+        recipes.addRecipe(new Recipe("DoubleEgg", doubleEggIngredients, doubleEggSteps, 5));
+        ingredients.addIngredient(new Ingredient("egg", 1, "pcs"));
+        output.reset();
+
+        Command cmd = parser.parse("cook 2");
+        executeCookCommand(cmd);
+
+        assertEquals(1, ingredients.getSize());
+        assertEquals(1.0, ingredients.getIngredient(ingredients.findIndexByName("egg")).getQuantity());
+        assertTrue(getOutput().contains("Oops! Not enough ingredients"));
+        assertTrue(!getOutput().contains("Cooked Recipe DoubleEgg"));
+    }
+
+    @Test
     public void parse_incorrectFormat_returnsNoOpCommand() {
         Command cmd = parser.parse("cook s");
 
@@ -102,6 +122,24 @@ public class CookTest {
         executeCookCommand(cmd);
 
         assertEquals(0, ingredients.getSize());
+    }
+
+    @Test
+    public void execute_validCookWithDuplicateIngredientRequirements_consumesAggregatedQuantity() {
+        ArrayList<Ingredient> doubleEggIngredients = new ArrayList<>();
+        doubleEggIngredients.add(new Ingredient("Egg", 1, "pcs"));
+        doubleEggIngredients.add(new Ingredient("egg", 1, "pcs"));
+        ArrayList<String> doubleEggSteps = new ArrayList<>();
+        doubleEggSteps.add("Cook");
+        recipes.addRecipe(new Recipe("DoubleEgg", doubleEggIngredients, doubleEggSteps, 5));
+        ingredients.addIngredient(new Ingredient("egg", 2, "pcs"));
+        output.reset();
+
+        Command cmd = parser.parse("cook 2");
+        executeCookCommand(cmd);
+
+        assertEquals(0, ingredients.getSize());
+        assertTrue(getOutput().contains("Cooked Recipe DoubleEgg"));
     }
 
     @Test

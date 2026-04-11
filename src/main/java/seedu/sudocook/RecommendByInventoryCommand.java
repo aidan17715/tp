@@ -31,7 +31,7 @@ public class RecommendByInventoryCommand extends Command {
     }
 
     private boolean canMake(Recipe recipe, Inventory inventory) {
-        for (Ingredient required : recipe.getIngredients()) {
+        for (Ingredient required : IngredientRequirements.aggregateFor(recipe)) {
             double available = -1;
             for (int j = 0; j < inventory.getSize(); j++) {
                 Ingredient item = inventory.getIngredient(j);
