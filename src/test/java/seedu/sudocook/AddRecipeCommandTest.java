@@ -33,6 +33,34 @@ public class AddRecipeCommandTest {
     }
 
     @Test
+    public void addCommand_existingNameCaseInsensitive_overwritesOriginalRecipe() {
+        ArrayList<Ingredient> originalIngredients = new ArrayList<>();
+        originalIngredients.add(new Ingredient("Rice", 2, "cups"));
+        ArrayList<String> originalSteps = new ArrayList<>();
+        originalSteps.add("Cook rice");
+
+        AddRecipeCommand original = new AddRecipeCommand("Fried Rice", originalIngredients, originalSteps, 15, 400);
+        original.execute(testRecipeBook);
+
+        ArrayList<Ingredient> replacementIngredients = new ArrayList<>();
+        replacementIngredients.add(new Ingredient("Noodles", 1, "packet"));
+        ArrayList<String> replacementSteps = new ArrayList<>();
+        replacementSteps.add("Boil noodles");
+
+        AddRecipeCommand replacement = new AddRecipeCommand("fried rice", replacementIngredients, replacementSteps,
+                5, 350);
+        replacement.execute(testRecipeBook);
+
+        Recipe savedRecipe = testRecipeBook.getRecipe(0);
+        assertEquals(1, testRecipeBook.getSize());
+        assertEquals("fried rice", savedRecipe.getName());
+        assertEquals("Noodles", savedRecipe.getIngredients().get(0).getName());
+        assertEquals("Boil noodles", savedRecipe.getSteps().get(0));
+        assertEquals(5, savedRecipe.getTime());
+        assertEquals(350, savedRecipe.getCalories());
+    }
+
+    @Test
     public void formatErrorTest() {
         String testCmd = "add-r Gibberish Gibberish";
         Ui ui = new Ui();
