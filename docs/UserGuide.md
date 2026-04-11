@@ -65,14 +65,18 @@ Oops! Time and calories cannot be negative.
 
 Shows the ingredients currently stored in your inventory.
 
+SudoCook stores each ingredient as one inventory item per name and unit, with separate quantities for
+each expiry date. For example, adding `Milk` in `carton` units twice with two different expiry dates
+keeps one Milk entry whose expiry list shows how much expires on each date.
+
 Format:
 
 * `list-i`
 * `list-i ex/YYYY-MM-DD`
 
 * `list-i` shows every ingredient in the inventory.
-* `list-i ex/YYYY-MM-DD` shows only ingredients whose expiry date is **before** the given date.
-* Ingredients without an expiry date are excluded from filtered results.
+* `list-i ex/YYYY-MM-DD` shows only expiry/quantity batches whose expiry date is **before** the given date.
+* Expiry/quantity batches without an expiry date are excluded from filtered results.
 * The date must be in `YYYY-MM-DD` format.
 
 Examples:
@@ -84,14 +88,14 @@ Examples:
 Expected output (listing all ingredients):
 ```
 Here are the ingredients in your inventory:
-1. Milk (1.0 carton) expires: 2026-03-30
-2. Salt (1.0 kg)
+1. Milk (3.0 carton) expiries: [2026-03-30: 1.0 carton, 2026-04-10: 2.0 carton]
+2. Salt (1.0 kg) expiries: [no expiry: 1.0 kg]
 ```
 
 Expected output (listing ingredients before a cutoff date):
 ```
 Here are the ingredients in your inventory expiring before 2026-04-01:
-1. Milk (1.0 carton) expires: 2026-03-30
+1. Milk (1.0 carton) expiries: [2026-03-30: 1.0 carton]
 ```
 
 Expected output (no matching ingredients):
@@ -108,11 +112,12 @@ Oops! Invalid expiry date format. Use: YYYY-MM-DD
 
 ### Sorting ingredients by expiry date: `sort-i`
 
-Sorts the inventory so that ingredients with earlier expiry dates appear first.
+Sorts the inventory so that ingredients with earlier expiry dates appear first. If an ingredient has
+multiple expiry dates, its earliest known expiry date is used for sorting.
 
 Format: `sort-i`
 
-* Ingredients with no expiry date are placed at the end of the inventory list.
+* Ingredients with no dated expiry batches are placed at the end of the inventory list.
 * Use `list-i` after sorting to view the updated order.
 
 Example:
@@ -121,7 +126,7 @@ Example:
 
 Expected output:
 ```
-Sorted!
+Sorting...
 ```
 
 ---
@@ -136,6 +141,9 @@ Format: `add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]`
 * `q/QUANTITY` is the amount of the ingredient (can be decimal, e.g., 2.5).
 * `u/UNIT` is the unit of measurement (e.g., cups, grams, pcs).
 * `ex/YYYY-MM-DD` is optional. If provided, sets the expiry date for the ingredient. Use format YYYY-MM-DD.
+* If an ingredient with the same name and unit already exists, the new amount is added to that
+  ingredient. If the expiry date is different, SudoCook stores it as a separate expiry/quantity
+  batch instead of overwriting the old expiry.
 
 Examples:
 
@@ -145,12 +153,12 @@ Examples:
 
 Expected output (with expiry):
 ```
-Added tomato (5.0 pcs) to inventory. Expiry: 2024-12-25
+Added: Tomato (5.0 pcs) expires: 2024-12-25
 ```
 
 Expected output (without expiry):
 ```
-Added flour (1.0 kg) to inventory.
+Added: Flour (1.0 kg)
 ```
 
 Expected output (invalid date format):
@@ -173,7 +181,10 @@ Format: `cook INDEX`
 
 * `INDEX` refers to the recipe's position in the recipe list.
 * Use `list-r` or `view-r` first if you need to confirm the correct index.
-* The recipe is only cooked if all required ingredients exist in the inventory in sufficient quantity.
+* The recipe is only cooked if all required ingredients exist in the inventory in sufficient total quantity.
+* Ingredient quantities are checked using the total amount across all expiry dates for that ingredient.
+* When ingredients are deducted, SudoCook deducts from the earliest expiry date first. When a batch
+  reaches zero, that expiry/quantity batch is removed.
 * If any ingredient is missing or insufficient, no inventory changes are made.
 
 Examples:
@@ -216,13 +227,14 @@ The `recommend-r` command has three modes:
 
 #### Ingredient-based recommendation
 
-Shows all recipes that contain a specific ingredient, provided your inventory holds at least the required quantity.
+Shows all recipes that contain a specific ingredient, provided your inventory holds at least the required total quantity.
 
 Format: `recommend-r n/INGREDIENT_NAME`
 
 * `INGREDIENT_NAME` is case-insensitive (`egg`, `Egg`, and `EGG` all work).
 * The ingredient must exist in your inventory; otherwise an error is shown.
-* Only recipes whose required quantity of the ingredient is **≤** the amount you have are listed.
+* Only recipes whose required quantity of the ingredient is **≤** the total amount you have across
+  all expiry dates are listed.
 
 Examples:
 
@@ -251,11 +263,12 @@ No recipes meet the requirement
 
 #### Inventory-based recommendation
 
-Shows all recipes that can be fully made with your current inventory — every required ingredient must be present in sufficient quantity.
+Shows all recipes that can be fully made with your current inventory — every required ingredient must be present in sufficient total quantity.
 
 Format: `recommend-r`
 
-* A recipe is only listed if **all** of its ingredients are available in the inventory with enough quantity.
+* A recipe is only listed if **all** of its ingredients are available in the inventory with enough
+  total quantity across all expiry dates.
 * Ingredient name matching is case-insensitive.
 
 Example:
@@ -285,6 +298,7 @@ Format: `recommend-r missing/N`
 * `N` must be a positive integer (e.g. `1`, `2`).
 * A recipe is included only if the number of ingredients with insufficient stock is **between 1 and N** (inclusive). Recipes you can already make in full are excluded.
 * For each missing ingredient the output shows the ingredient name, the shortfall amount, and the unit.
+* Shortfalls are calculated using the total amount available across all expiry dates.
 * Ingredient name matching is case-insensitive.
 
 Examples:
@@ -620,7 +634,8 @@ RECIPE COMMANDS:
 
 **A**: Copy the `data/` folder (which contains `recipes.json` and `inventory.json`) from your current
 SudoCook home directory to the same location on the other computer. The data files are plain JSON and
-are fully portable.
+are fully portable. Inventory entries store expiry/quantity batches in `inventory.json`, so multiple
+expiry dates for the same ingredient are preserved.
 
 ## Command Summary
 
@@ -632,7 +647,7 @@ are fully portable.
 | Filter recipes | `filter-r [t/MAX_TIME] [c/MAX_CALORIES]` |
 | Delete recipe | `delete-r INDEX` |
 | Cook recipe | `cook INDEX` |
-| Add ingredient | `add-i n/NAME q/QUANTITY u/UNIT ex/EXPIRY_DATE` |
+| Add ingredient | `add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]` |
 | List ingredients | `list-i` or `list-i ex/YYYY-MM-DD` |
 | Sort ingredients | `sort-i` |
 | Sort recipes | `sort-r n/` or `sort-r t/` or `sort-r c/` |

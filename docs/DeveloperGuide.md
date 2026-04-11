@@ -9,6 +9,57 @@ project created by the [SE-EDU initiative](https://se-education.org).
 
 ## Design & implementation
 
+### Ingredient inventory storage model
+
+#### Overview
+
+SudoCook stores inventory ingredients as one `Ingredient` object per case-insensitive name and unit
+pair. Each `Ingredient` owns a list of expiry/quantity pairs, represented by `Ingredient.ExpiryQuantity`.
+This allows the app to keep separate batches such as:
+
+```text
+Milk (3.0 carton) expiries: [2026-04-01: 1.0 carton, 2026-05-01: 2.0 carton]
+```
+
+Callers that only need stock availability continue to call `Ingredient.getQuantity()`, which returns
+the total quantity across all expiry dates. This keeps recommendation and cooking availability checks
+simple while preserving batch-level expiry data for listing, storage, sorting, and deduction.
+
+#### Implementation
+
+The storage model involves three main classes:
+
+| Class | Role |
+|---|---|
+| `Ingredient` | Stores the ingredient name, unit, and expiry/quantity pairs; returns total quantity via `getQuantity()` |
+| `Inventory` | Merges ingredients with the same name and unit, and deducts from expiry batches in earliest-expiry order |
+| `Storage` | Persists and loads expiry/quantity pairs using the `expiryQuantities` JSON array |
+
+**Key behaviours:**
+
+1. `Inventory.addIngredient()` searches for an existing ingredient with the same name and unit.
+2. If a match exists, the incoming ingredient's expiry/quantity pairs are merged into that item.
+3. If the same expiry date already exists, the quantities are added together.
+4. If the expiry date is different, a new expiry/quantity pair is retained under the same ingredient.
+5. `Ingredient.getQuantity()` sums all expiry/quantity pairs for availability checks.
+6. `Inventory.updateQuantity()` delegates to `Ingredient.deductQuantity()`, which deducts from the
+   earliest non-null expiry first and removes an expiry/quantity pair once its quantity reaches zero.
+7. `Storage.saveInventory()` writes both the total `quantity` and the batch-level `expiryQuantities`.
+   `Storage.loadInventory()` reads `expiryQuantities` when present, while still supporting older
+   inventory records that only contain `quantity` and optional `expiryDate`.
+
+**Design consideration: aggregate quantity vs. separate ingredient rows**
+
+| Option | Pros | Cons |
+|---|---|---|
+| One ingredient row with expiry/quantity pairs (current) | Keeps same-name/unit stock together; availability checks can use total quantity; listing can still show batch expiry details | `Ingredient` is more complex than a single quantity field |
+| Separate ingredient row per expiry date | Simpler per-row data model | Recommendation and cook logic must aggregate rows; listing/search output can contain repeated ingredient names |
+
+*Decision:* The expiry/quantity list was chosen because it preserves batch-level expiry data without
+forcing every upstream command to understand batch aggregation.
+
+---
+
 ### `recommend-r` — Recipe Recommendation
 
 #### Overview
@@ -25,7 +76,7 @@ The `recommend-r` command supports three modes of recipe recommendation:
   ingredient, provided the inventory holds enough of it.
 - **Inventory-based mode** (`recommend-r`): recommends every recipe whose **full** ingredient list
   can be satisfied by the current inventory — i.e. every required ingredient is present and in
-  sufficient quantity.
+  sufficient total quantity.
 - **Missing-based mode** (`recommend-r missing/N`): recommends recipes that are missing **at most N**
   ingredients (or insufficient quantities), and shows the exact shortfall for each missing ingredient
   so the user knows what to buy.
@@ -62,10 +113,10 @@ The feature involves six classes:
 3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
 4. Inside `execute()`:
    - The inventory is searched linearly for a case-insensitive name match. The available quantity
-     is recorded.
+     is recorded using `Ingredient.getQuantity()`, which returns the total across all expiry dates.
    - If the ingredient is not found, `Ui.printError()` is called and execution stops.
    - Otherwise, each recipe in `RecipeBook` is inspected. A recipe qualifies if it contains the
-     ingredient **and** requires a quantity ≤ the available amount.
+     ingredient **and** requires a quantity ≤ the total available amount.
    - If no recipe qualifies, a "No recipes meet the requirement" message is printed; otherwise the
      list of matching recipe names is printed.
 
@@ -96,8 +147,8 @@ Key snippet from `RecommendByIngredientCommand`:
 4. Inside `execute()`, each recipe is evaluated by `canMake(recipe, inventory)`:
    - For every ingredient required by the recipe, the inventory is searched for a
      case-insensitive name match.
-   - If the ingredient is absent or the available quantity is less than required, `canMake`
-     returns `false` and the recipe is excluded.
+   - If the ingredient is absent or the total available quantity across all expiry dates is less
+     than required, `canMake` returns `false` and the recipe is excluded.
    - If all ingredients pass, `canMake` returns `true` and the recipe is appended to the result.
    - If no recipe is makeable, a "No recipes can be made" message is printed; otherwise the list of
      makeable recipe names is printed.
@@ -135,8 +186,8 @@ Key snippet from `RecommendByInventoryCommand`:
 4. Inside `execute()`, each recipe is evaluated by `getMissingIngredients(recipe, inventory)`:
    - For every ingredient required by the recipe, the inventory is searched for a case-insensitive
      name match.
-   - If the ingredient is absent or the available quantity is less than required, the shortfall
-     (`required quantity − available quantity`) and unit are recorded.
+   - If the ingredient is absent or the total available quantity across all expiry dates is less
+     than required, the shortfall (`required quantity − available quantity`) and unit are recorded.
    - The method returns the list of formatted shortfall strings (e.g. `"Salt (1.0 g)"`).
 5. Back in `execute()`, the recipe is included in the output only if the number of missing items is
    **between 1 and N** (inclusive). Recipes with zero missing items — i.e. fully makeable ones —
@@ -223,7 +274,8 @@ command and keeps the help output concise.
 | `required ≤ available` (current) | Includes recipes the user has just enough for | Cannot account for partial use in the same session |
 | `required < available` | Leaves a buffer | Unnecessarily excludes exact-match recipes |
 
-*Decision:* `≤` comparison is used so that a recipe requiring exactly the available quantity is still recommended.
+*Decision:* `≤` comparison is used so that a recipe requiring exactly the total available quantity
+is still recommended.
 
   ---
 
@@ -308,7 +360,8 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 
 The `cook` command prepares a recipe by consuming the required ingredients from the user's
 inventory. It first checks that the requested recipe exists and that every required ingredient is
-available in sufficient quantity before any inventory updates are made.
+available in sufficient total quantity before any inventory updates are made. If an ingredient has
+multiple expiry batches, deduction starts from the earliest expiry date.
 
 **Command format:** `cook INDEX`
 
@@ -323,7 +376,7 @@ The feature involves four main classes:
 | `Parser` | Parses raw input, validates the recipe index, and constructs a `CookCommand` |
 | `CookCommand` | Validates ingredient availability and performs the cooking logic |
 | `RecipeBook` | Provides access to the recipe selected by the user |
-| `Inventory` | Stores ingredient quantities and is updated after a successful cook |
+| `Inventory` | Stores expiry-specific ingredient quantities and is updated after a successful cook |
 
 **Step-by-step execution:**
 
@@ -338,11 +391,14 @@ The feature involves four main classes:
     - If the recipe is `null`, execution stops immediately. This happens when the requested index is
       out of bounds.
     - The recipe's ingredient list is checked first to ensure every required ingredient exists in
-      the inventory and has enough quantity.
+      the inventory and has enough total quantity.
     - If any ingredient is missing or insufficient, `Ui.printError()` is called and the inventory
       remains unchanged.
-    - If all checks pass, the required quantities are removed from the inventory and a success
-      message is printed.
+    - If all checks pass, the required quantities are removed from the inventory through
+      `DeleteIngredientCommand`, which eventually calls `Inventory.updateQuantity()`.
+    - `Inventory.updateQuantity()` deducts from the earliest expiry batch first and removes a batch
+      when its quantity reaches zero.
+    - A success message is printed after all deductions are complete.
 
 Key snippet from `CookCommand`:
 
@@ -406,12 +462,24 @@ displayed starting from 1.
 *Decision:* Reusing `DeleteIngredientCommand` keeps ingredient-removal behavior centralized even
 though it adds a small amount of indirection.
 
+**Aspect: Expiry-aware deduction order**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Deduct from earliest expiry first (current) | Reduces food waste and matches the user's likely intended consumption order | Requires batch-level expiry tracking |
+| Deduct from latest expiry first | Keeps older entries visible longer | Counterintuitive for perishable ingredients |
+| Deduct proportionally across batches | Preserves batch distribution | Harder to explain and produces less useful expiry tracking |
+
+*Decision:* Earliest-expiry-first deduction was chosen because it aligns inventory updates with the
+usual "use what expires first" kitchen workflow.
+
 ### `sort-i` - Sort Inventory by Expiry Date
 
 #### Overview
 
 The `sort-i` command sorts the inventory so that ingredients with earlier expiry dates appear
-first. Ingredients without an expiry date are placed at the end of the list.
+first. If an ingredient has multiple expiry batches, the earliest non-null expiry date is used as
+that ingredient's sort key. Ingredients with no dated expiry batches are placed at the end of the list.
 
 **Command format:** `sort-i`
 
@@ -434,15 +502,16 @@ The feature involves four main classes:
 2. `Parser.parse()` detects the prefix and constructs a `SortInventoryCommand`.
 3. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
 4. Inside `execute()`:
-    - `Inventory.sortIngredients()` sorts the internal ingredient list by expiry date.
-    - `Ui.printMessage("Sorted!")` is called to confirm completion.
+    - `Inventory.sortIngredients()` sorts the internal ingredient list by each ingredient's earliest
+      non-null expiry date.
+    - `Ui.printMessage("Sorting...")` is called to confirm the command is running.
 
 Key snippet from `SortInventoryCommand`:
 
 ```text
   public void execute (Inventory ingredients){
+      Ui.printMessage("Sorting...");
       ingredients.sortIngredients();
-      Ui.printMessage("Sorted!");
   }
 ```
 
@@ -462,7 +531,7 @@ Key snippet from `SortInventoryCommand`:
 
 | Option | Pros | Cons |
 |---|---|---|
-| Sort by expiry date with `null` values last (current) | Helps users prioritise ingredients that expire sooner | Less useful when many ingredients have no expiry date |
+| Sort by earliest expiry date with `null` values last (current) | Helps users prioritise ingredients that expire sooner | Less useful when many ingredients have no expiry date |
 | Sort alphabetically by name | Easy to scan for a specific ingredient | Does not help with expiry-based planning |
 
 *Decision:* Sorting by expiry date is more useful for kitchen inventory management because it
@@ -485,8 +554,8 @@ triggering behaviour rather than manipulating internal data structures directly.
 #### Overview
 
 The `list-i` command displays the ingredients currently stored in the inventory. It supports two
-variants: listing all ingredients, or listing only ingredients whose expiry date is before a given
-cutoff.
+variants: listing all ingredients with their expiry/quantity pairs, or listing only the
+expiry/quantity pairs whose expiry date is before a given cutoff.
 
 **Command formats:**
 - `list-i`
@@ -516,8 +585,10 @@ The feature involves four main classes:
 6. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
 7. Inside `execute()`:
     - `Inventory.getIngredients()` is called to retrieve the stored ingredients.
-    - If an expiry cutoff exists, ingredients are filtered to those with a non-null expiry date
-      before the cutoff.
+    - If an expiry cutoff exists, ingredients are filtered to those with at least one non-null
+      expiry batch before the cutoff.
+    - The output for filtered mode uses only the matching expiry/quantity pairs. Other batches for
+      the same ingredient remain stored but are not shown in that filtered result.
     - If the resulting list is empty, `Ui.printMessage()` prints an empty-state message.
     - Otherwise, a numbered list with the appropriate header is built and printed.
 
@@ -531,8 +602,7 @@ Key snippet from `ListIngredientCommand`:
 
   ArrayList<Ingredient> filteredIngredients = new ArrayList<>();
   for (Ingredient ingredient : ingredients) {
-      LocalDate ingredientExpiry = ingredient.getExpiryDate();
-      if (ingredientExpiry != null && ingredientExpiry.isBefore(expiry)) {
+      if (ingredient.hasExpiryBefore(expiry)) {
           filteredIngredients.add(ingredient);
       }
   }
@@ -566,10 +636,10 @@ covering both use cases.
 
 | Option | Pros | Cons |
 |---|---|---|
-| Exclude ingredients with `null` expiry dates (current) | Keeps the filtered result precise; avoids guessing how undated items should compare | Undated ingredients never appear in cutoff-based results |
-| Include ingredients with `null` expiry dates | Ensures no ingredient is hidden | Makes "expiring before" results less accurate |
+| Exclude expiry batches with `null` expiry dates (current) | Keeps the filtered result precise; avoids guessing how undated items should compare | Undated quantities never appear in cutoff-based results |
+| Include expiry batches with `null` expiry dates | Ensures no quantity is hidden | Makes "expiring before" results less accurate |
 
-*Decision:* Ingredients without expiry dates are excluded in cutoff mode because the filter is
+*Decision:* Expiry batches without dates are excluded in cutoff mode because the filter is
 intended to show only items known to expire before the requested date.
 
 ### `add-i` — Add an Ingredient
@@ -578,7 +648,9 @@ intended to show only items known to expire before the requested date.
 
 The `add-i` command adds an ingredient to the user's inventory with optional expiry date tracking.
 The user specifies the ingredient name, quantity, and unit of measurement. An expiry date in
-YYYY-MM-DD format can optionally be provided to help track when ingredients should be used.
+YYYY-MM-DD format can optionally be provided to help track when ingredients should be used. When
+the same name and unit are added again, the new quantity is merged into the existing ingredient as
+an expiry/quantity batch rather than overwriting earlier expiry information.
 
 **Command format:** `add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]`
 
@@ -607,16 +679,18 @@ The feature involves four main classes:
 5. An `AddIngredientCommand` is constructed with the parsed values.
 6. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
 7. Inside `execute()`:
-    - `Inventory.addIngredient(name, quantity, unit, expiryDate)` adds the ingredient to the list.
+    - An `Ingredient` is created with the parsed name, quantity, unit, and optional expiry date.
+    - `Inventory.addIngredient(ingredient)` adds the ingredient or merges its expiry/quantity batch
+      into an existing ingredient with the same name and unit.
     - A success message is printed via `Ui.printMessage()`.
 
 Key snippet from `AddIngredientCommand`:
 
 ```text
   public void execute(Inventory inventory) {
-      inventory.addIngredient(name, quantity, unit, expiryDate);
-      Ui.printMessage("Added " + name + " (" + quantity + " " + unit + ")"
-          + (expiryDate != null ? " expires: " + expiryDate : ""));
+      Ingredient ingredient = new Ingredient(name, quantity, unit, expiryDate);
+      inventory.addIngredient(ingredient);
+      Ui.printMessage("Added: " + ingredient);
   }
 ```
 
@@ -633,6 +707,17 @@ Key snippet from `AddIngredientCommand`:
 
 *Decision:* Making expiry date optional provides maximum flexibility while still supporting expiry
 tracking where it matters most.
+
+**Aspect: Handling repeated additions with different expiry dates**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Merge into expiry/quantity batches under the same ingredient (current) | Preserves all expiry dates while keeping one inventory item per name/unit | Requires the ingredient model to maintain a list of batches |
+| Replace the existing expiry date | Simple | Corrupts expiry tracking when multiple batches exist |
+| Store each batch as a separate inventory item | Preserves expiry dates | Repeats the same ingredient in search/list output and forces recommendations to aggregate rows |
+
+*Decision:* Repeated additions are merged into expiry/quantity batches so the total quantity remains
+easy to query while preserving the batch-level expiry dates.
 
 ---
 
@@ -1175,7 +1260,8 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 ## Glossary
 
 * *Recipe* — A named dish with a list of required ingredients, preparation steps, time, and calorie count.
-* *Ingredient* — A named item with a quantity, unit, and optional expiry date.
+* *Ingredient* — A named inventory or recipe item. Inventory ingredients store a unit and one or
+  more expiry/quantity pairs; recipe ingredients store the quantity and unit required by a recipe.
 * *Inventory* — The collection of ingredients currently available to the user.
 * *Recipe Book* — The collection of all saved recipes.
 
@@ -1187,9 +1273,9 @@ codebase packaged as a single runnable JAR, with no DBMS and no reliance on remo
 4. **View recipe**: `view-r 1`. Verify full recipe details including calories are displayed.
 5. **Filter recipes**: `filter-r t/20`. Verify only recipes with time ≤ 20 are shown.
 6. **Filter by calories**: `filter-r c/300`. Verify only recipes with calories ≤ 300 are shown.
-7. **Add an ingredient**: `add-i n/egg q/3 u/pcs`. Verify the ingredient is added with the correct details.
-8. **Ingredient-based recommendation**: `recommend-r n/egg`. Verify only recipes requiring enough eggs are displayed.
-9. **Inventory-based recommendation**: `recommend-r`. Verify only recipes can be made by using current stocks are displayed.
-10. **Missing-based recommendation**: `recommend-r missing/2`. Verify only recipes missing 2 or more ingredients are displayed.
+7. **Add an ingredient**: `add-i n/egg q/3 u/pcs ex/2026-04-01`, then `add-i n/egg q/2 u/pcs ex/2026-05-01`. Verify `list-i` shows one egg entry with both expiry/quantity batches.
+8. **Ingredient-based recommendation**: `recommend-r n/egg`. Verify only recipes requiring enough total eggs are displayed.
+9. **Inventory-based recommendation**: `recommend-r`. Verify only recipes that can be made using current total stocks are displayed.
+10. **Missing-based recommendation**: `recommend-r missing/2`. Verify only recipes missing at most 2 ingredients or quantities are displayed.
 11. **Delete a recipe**: `delete-r 1`. Verify the recipe is removed and `list-r` no longer shows it.
-12. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes are loaded.
+12. **Persistence**: Exit with `bye`, restart the application, and verify saved recipes and inventory expiry/quantity batches are loaded.
