@@ -190,7 +190,7 @@ public class RecommendByMissingCommandTest {
     }
 
     @Test
-    public void execute_inventoryInLargerUnit_sufficientAfterConversion_notMissing() {
+    public void execute_largerUnitSufficient_notMissing() {
         // Omelette needs Salt 1 g; inventory has Salt 0.002 kg (= 2 g ≥ 1 g) → Salt not missing
         inventory.addIngredient(new Ingredient("Egg", 3, "pcs"));
         inventory.addIngredient(new Ingredient("Salt", 0.002, "kg"));
@@ -202,7 +202,7 @@ public class RecommendByMissingCommandTest {
     }
 
     @Test
-    public void execute_inventoryInSmallerUnit_insufficientAfterConversion_showsCorrectShortfall() {
+    public void execute_smallerUnitInsufficient_showsCorrectShortfall() {
         // Omelette needs Salt 1 g; inventory has Salt 500 mg (= 0.5 g < 1 g) → shortfall 0.5 g
         inventory.addIngredient(new Ingredient("Egg", 3, "pcs"));
         inventory.addIngredient(new Ingredient("Salt", 500, "mg"));

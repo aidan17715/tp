@@ -192,7 +192,7 @@ public class RecommendByInventoryCommandTest {
     }
 
     @Test
-    public void execute_inventoryInSmallerUnit_insufficientAfterConversion_recipeExcluded() {
+    public void execute_smallerUnitInsufficient_recipeExcluded() {
         // Mixue needs Water 1 Liter; Inventory has only 500 ml (< 1000 ml) → cannot make
         inventory.addIngredient(new Ingredient("Water", 500, "ml"));
         inventory.addIngredient(new Ingredient("Sugar", 2, "mg"));
