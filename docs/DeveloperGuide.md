@@ -1,5 +1,8 @@
 # Developer Guide
 
+The diagram below gives a high-level overview of SudoCook's architecture and how its main
+components relate to one another.
+
 ![Architecture Diagram](team/ArchDiagram.png)
 
 ## Acknowledgements
@@ -353,22 +356,6 @@ The feature involves four main classes:
       when its quantity reaches zero.
     - A success message is printed after all deductions are complete.
 
-Key snippet from `CookCommand`:
-
-```text
-  for (Ingredient i : recipe.getIngredients()) {
-      int ingredientIndex = inventory.findIndexByName(i.getName());
-      if (ingredientIndex < 0
-              || inventory.getIngredient(ingredientIndex).getQuantity() < i.getQuantity()) {
-          throw new RuntimeException("Not enough ingredients");
-      }
-  }
-
-  for (Ingredient i : recipe.getIngredients()) {
-      Command c = new DeleteIngredientCommand(i.getName(), i.getQuantity());
-      c.execute(inventory);
-  }
-```
 
   ---
 
