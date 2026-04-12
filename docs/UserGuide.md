@@ -49,6 +49,11 @@ Expected output (invalid format):
 Oops! Invalid add-r format. Use: add-r NAME i/INGREDIENTS s/STEPS t/TIME c/CALORIES
 ```
 
+Expected output (invalid integer):
+```
+Oops! Invalid add-r format. Time and calories should be integers.
+```
+
 Expected output (invalid ingredient quantity):
 ```
 Oops! Invalid ingredient quantity in add-r format.
@@ -236,9 +241,11 @@ Examples:
 
 `cook 3`
 
-Result after a successful cook:
+Expected output after a successful cook:
 ```
-The recipe is cooked successfully and the required ingredients are removed from the inventory.
+Removed <quantity>: <ingredient>
+Removed <quantity>: <ingredient>
+Cooked Recipe <Recipe Name>
 ```
 
 Expected output (not enough ingredients):
