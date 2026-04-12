@@ -237,7 +237,7 @@ public class Parser {
         ArrayList<Ingredient> ingredients = new ArrayList<>();
         ArrayList<String> steps = new ArrayList<>();
         String addRecipeInput = input.substring("add-r".length()).trim();
-        Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+?)\\s+t/(\\d+)\\s+c/(\\d+)$");
+        Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+?)\\s+t/(-?\\d+)\\s+c/(-?\\d+)$");
         Matcher addRecipeMatcher = addRecipePattern.matcher(addRecipeInput);
 
         if (!addRecipeMatcher.matches()) {
