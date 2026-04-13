@@ -1,9 +1,11 @@
-ui Jiahao - Project Portfolio Page
+# Project Portfolio Page - Cui Jiahao
 
-## Overview
+## Project: SudoCook
 **SudoCook** is a Java-based Command-Line Interface (CLI) application designed to help users manage recipes and kitchen
 inventory efficiently. It enables students and home cooks to track their ingredients and discover what they can cook
 through an intuitive text interface.
+
+---
 
 ### Summary of Contributions
 
