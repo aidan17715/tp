@@ -22,3 +22,4 @@ through an intuitive text interface.
 #### Contributions to team-based tasks
 - Set up the github organization and forked the repository.
 - Led the division of tasks in a manner that reduces temporal and interpersonal dependency (so that, ideally, work related to the same functional code only done by one person in a week, a team member doesn't need to wait until another member has finished, and everyone has roughly equal workload).
+- After PE-D, categorise, combine and summarize issues at https://github.com/AY2526S2-CS2113-W13-2/tp/issues/145
