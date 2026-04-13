@@ -21,7 +21,7 @@ public class Recipe {
     }
 
     public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time, int calories) {
-        this.name = name;
+        this.name = normalizeSpaces(name);
         this.ingredients = ingredients;
         this.steps = steps;
         this.time = time;
@@ -29,6 +29,10 @@ public class Recipe {
         assert(name != null);
         assert(ingredients != null);
         assert(steps != null);
+    }
+
+    private String normalizeSpaces(String value) {
+        return value.trim().replaceAll("\\s+", " ");
     }
 
     public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time) {

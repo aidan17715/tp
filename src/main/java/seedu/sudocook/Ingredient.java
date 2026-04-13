@@ -47,8 +47,8 @@ public class Ingredient {
         assert name != null && !name.isEmpty() : "Ingredient name must not be null or empty";
         assert quantity > 0 : "Ingredient quantity must be positive";
         assert unit != null && !unit.isEmpty() : "Ingredient unit must not be null or empty";
-        this.name = name;
-        this.unit = unit;
+        this.name = normalizeSpaces(name);
+        this.unit = normalizeSpaces(unit);
         this.expiryQuantities = new ArrayList<>();
         addQuantity(quantity, null);
     }
@@ -65,10 +65,14 @@ public class Ingredient {
         assert name != null && !name.isEmpty() : "Ingredient name must not be null or empty";
         assert quantity > 0 : "Ingredient quantity must be positive";
         assert unit != null && !unit.isEmpty() : "Ingredient unit must not be null or empty";
-        this.name = name;
-        this.unit = unit;
+        this.name = normalizeSpaces(name);
+        this.unit = normalizeSpaces(unit);
         this.expiryQuantities = new ArrayList<>();
         addQuantity(quantity, expiryDate);
+    }
+
+    private String normalizeSpaces(String value) {
+        return value.trim().replaceAll("\\s+", " ");
     }
 
     public String getName() {
