@@ -319,6 +319,14 @@ inventory. It first checks that the requested recipe exists and that every requi
 available in sufficient total quantity before any inventory updates are made. If an ingredient has
 multiple expiry batches, deduction starts from the earliest expiry date.
 
+Before validation, duplicate ingredients inside the same recipe are aggregated into one requirement
+entry (sum of quantities) via `IngredientRequirements.aggregateFor(recipe)`. This ensures checks and
+deduction are based on the total required amount per ingredient.
+
+Unit handling for `cook` is strict equality only (case-insensitive). Unlike `recommend-r`, `cook`
+does not perform unit conversion. If inventory and recipe units differ (e.g., `kg` vs `g`, or `cups`
+vs `ml`), the command treats it as a unit mismatch and stops without mutating inventory.
+
 **Command format:** `cook INDEX`
 
   ---
@@ -346,11 +354,13 @@ The feature involves four main classes:
 5. Inside `execute()`:
     - If the recipe is `null`, execution stops immediately. This happens when the requested index is
       out of bounds.
-    - The recipe's ingredient list is checked first to ensure every required ingredient exists in
-      the inventory and has enough total quantity.
-    - If any ingredient is missing or insufficient, `Ui.printError()` is called and the inventory
-      remains unchanged.
-    - If all checks pass, the required quantities are removed from the inventory through
+    - The recipe's ingredient list is first aggregated by `IngredientRequirements.aggregateFor(recipe)`
+      so duplicate ingredient names are merged and quantities are summed before validation.
+    - A full validation pass is then performed to ensure each aggregated requirement exists in
+      inventory, has matching unit (case-insensitive), and has enough total quantity.
+    - If any ingredient is missing, unit-mismatched, or insufficient, `Ui.printError()` is called
+      and the inventory remains unchanged.
+    - If all checks pass, the required quantities are removed in a second pass through
       `DeleteIngredientCommand`, which eventually calls `Inventory.updateQuantity()`.
     - `Inventory.updateQuantity()` deducts from the earliest expiry batch first and removes a batch
       when its quantity reaches zero.
@@ -397,6 +407,32 @@ displayed starting from 1.
 | Remove ingredients as they are checked | Slightly simpler flow | Can leave inventory partially updated if a later ingredient is missing |
 
 *Decision:* Validation is performed before removal so `cook` behaves as an all-or-nothing operation.
+
+This means `cook` is atomic at command level: either all required ingredients are deducted, or no
+inventory mutation occurs.
+
+  ---
+
+**Aspect: Handling duplicate ingredients in one recipe**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Aggregate duplicate requirements first (current) | Correct total requirement check and deduction for repeated ingredient entries | Adds a preprocessing step |
+| Validate and deduct each raw entry independently | Simpler loop structure | Error-prone with repeated ingredient lines and mixed checks |
+
+*Decision:* `IngredientRequirements.aggregateFor(recipe)` is used before validation and deduction,
+so repeated ingredients are treated as one combined requirement.
+
+  ---
+
+**Aspect: Unit handling in `cook`**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Require exact unit match (current) | Simple and predictable; avoids ambiguous conversions in destructive operations | More strict than recommendation flow |
+| Auto-convert compatible units | More permissive for users | Additional complexity and risk of accidental deduction due to conversion assumptions |
+
+*Decision:* `cook` requires case-insensitive unit equality and rejects mismatches.
 
   ---
 
@@ -1070,33 +1106,36 @@ The feature involves four main classes:
 |---|---|
 | `Parser` | Detects the `undo` keyword and constructs an `UndoCommand` |
 | `UndoCommand` | Restores the previous inventory and recipe state from history |
-| `CommandHistory` | Manages a queue of up to 50 state snapshots (inventory + recipes) |
+| `CommandHistory` | Manages a stack of up to 50 state snapshots (inventory + recipes) |
 | `SudoCook` | Saves state snapshots before executing modifying commands |
 
 **Step-by-step execution:**
 
 1. The user enters `undo`.
-2. `Parser.parse()` detects the `undo` keyword and constructs a new `UndoCommand`.
+2. `Parser.parse()` recognises `undo` via command-keyword matching and constructs a new
+   `UndoCommand`.
 3. `SudoCook` detects the command type and calls `cmd.execute(history, recipes, inventory)`.
 4. Inside `execute()`:
     - `CommandHistory.canUndo()` checks if there are any saved snapshots.
-    - If no snapshots exist, a "No commands to undo" message is printed.
-    - If snapshots exist, the most recent snapshot is retrieved and restored to both `recipes` and
-      `inventory`.
+  - If no snapshots exist, `Ui.printError("No commands to undo.")` is called.
+  - If snapshots exist, `CommandHistory.undo(recipes, inventory)` restores both states in place.
     - A success message is printed via `Ui.printMessage()`.
 
 Key snippet from `UndoCommand`:
 
 ```text
-  public void execute(CommandHistory history, RecipeBook recipes, Inventory inventory) {
-      if (!history.canUndo()) {
-          Ui.printMessage("No commands to undo.");
+  public void execute(CommandHistory history, RecipeBook recipeBook, Inventory inventory) {
+    if (history == null || !history.canUndo()) {
+      Ui.printError("No commands to undo.");
           return;
       }
-      CommandHistory.Snapshot snapshot = history.undo();
-      recipes.restoreState(snapshot.getRecipes());
-      inventory.restoreState(snapshot.getIngredients());
+
+    boolean success = history.undo(recipeBook, inventory);
+    if (success) {
       Ui.printMessage("Command undone successfully!");
+    } else {
+      Ui.printError("No commands to undo.");
+    }
   }
 ```
 
