@@ -52,6 +52,11 @@ public class SudoCook {
                 continue;
             }
             cmd = parser.parse(input);
+            if (cmd.getClass() == Command.class) {
+                logger.log(Level.FINE, "Ignoring no-op command");
+                input = ui.readInput();
+                continue;
+            }
             if (cmd instanceof SearchIngredientCommand) {
                 logger.log(Level.FINE, "Routing search-i command to Inventory");
                 cmd.execute(inventory);
