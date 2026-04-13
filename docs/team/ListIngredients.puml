@@ -43,10 +43,9 @@ activate Inventory
 Inventory --> Cmd : ingredients
 deactivate Inventory
 
-alt expiry cutoff provided
+opt expiry cutoff provided
     Cmd -> Cmd : getIngredientsToDisplay(inventory, expiry)
     Cmd --> Cmd : ingredients
-else no expiry cutoff
 end
 
 alt no ingredients to display
