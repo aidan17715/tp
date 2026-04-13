@@ -39,6 +39,7 @@ Format: `add-r {NAME} i/INGREDIENT_NAME QUANTITY UNIT [INGREDIENT_NAME QUANTITY 
 * Ingredients or steps containing spaces should be wrapped in `{}`.
 * `TIME_IN_MINUTES` must be a non-negative integer.
 * `CALORIES` must be a positive integer (greater than 0) representing the calorie count in kcal.
+* Recipe names must be unique (case-insensitive). Adding a recipe with a duplicate name will be rejected.
 
 Examples:
 
@@ -81,6 +82,11 @@ Oops! Invalid ingredient quantity in add-r format.
 Expected output (zero or negative calories):
 ```
 Oops! Calories must be a positive number. A meal cannot have 0 or negative calories.
+```
+
+Expected output (duplicate recipe name):
+```
+Oops! A recipe named "Fried Rice" already exists.
 ```
 
 ---

@@ -98,7 +98,7 @@ public class Ui {
     }
 
     public String readInput() {
-        System.out.print(INDENT + "> ");
+        System.out.print(INDENT + ">");
         if (scanner.hasNextLine()) {
             return scanner.nextLine().trim();
         } else {

@@ -75,13 +75,12 @@ public class RecipeBook {
 
     public Recipe addRecipe(String name, ArrayList<Ingredient> ingredients,
             ArrayList<String> steps, int time, int calories) {
-        Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
-        for (int i = 0; i < recipes.size(); i++) {
-            if (recipes.get(i).getName().equalsIgnoreCase(name)) {
-                recipes.set(i, newRecipe);
-                return newRecipe;
+        for (Recipe recipe : recipes) {
+            if (recipe.getName().equalsIgnoreCase(name)) {
+                throw new IllegalArgumentException("A recipe named \"" + name + "\" already exists.");
             }
         }
+        Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
         recipes.add(newRecipe);
         return newRecipe;
     }
