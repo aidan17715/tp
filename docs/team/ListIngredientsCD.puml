@@ -1,0 +1,56 @@
+@startuml
+!pragma layout smetana
+scale 4
+hide circle
+skinparam classAttributeIconSize 0
+
+class Command {
+    --
+    + execute(inventory: Inventory): void
+    + execute(inventory: Inventory, expiry: LocalDate): void
+}
+
+class ListIngredientCommand {
+    - expiryCutoff: LocalDate
+    --
+    + ListIngredientCommand()
+    + ListIngredientCommand(expiryCutoff: LocalDate)
+    + execute(inventory: Inventory): void
+    + execute(inventory: Inventory, expiry: LocalDate): void
+    - getIngredientsToDisplay(inventory: Inventory, expiry: LocalDate): ArrayList<Ingredient>
+    - getHeader(expiry: LocalDate): String
+    - getEmptyMessage(expiry: LocalDate): String
+}
+
+class Inventory {
+    - ingredients: ArrayList<Ingredient>
+    --
+    + getIngredients(): ArrayList<Ingredient>
+}
+
+class Ingredient {
+    - name: String
+    - quantity: double
+    - unit: String
+    --
+    + hasExpiryBefore(expiry: LocalDate): boolean
+    + toString(expiryCutoff: LocalDate): String
+}
+
+class Ui {
+    --
+    {static} + printMessage(message: String): void
+}
+
+' Inheritance
+ListIngredientCommand --|> Command
+
+' List flow dependencies
+ListIngredientCommand ..> Inventory
+ListIngredientCommand ..> Ingredient
+ListIngredientCommand ..> Ui
+
+' Data relationship required by listing
+Inventory "1" o-- "*" Ingredient
+
+@enduml

@@ -2,7 +2,6 @@
 'https://plantuml.com/sequence-diagram
 
 scale 4
-autonumber
 hide footbox
 
 skinparam MaxMessageSize 150

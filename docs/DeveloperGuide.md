@@ -359,11 +359,19 @@ The feature involves four main classes:
 
   ---
 
+#### Class Diagram
+
+![Cook Class Diagram](team/cookCD.png)
+
+*Figure 5: Class Diagram for the `cook` command*
+
+  ---
+
 #### Sequence Diagram
 
 ![Cook Sequence Diagram](team/cook.png)
 
-*Figure 5: Sequence Diagram for the `cook` command*
+*Figure 6: Sequence Diagram for the `cook` command*
 
   ---
 
@@ -457,11 +465,19 @@ Key snippet from `SortInventoryCommand`:
 
   ---
 
+#### Class Diagram
+
+![Sort Inventory Class Diagram](team/SortInventoryCD.png)
+
+*Figure 7: Class Diagram for the `sort-i` command*
+
+  ---
+
 #### Sequence Diagram
 
 ![Sort Inventory Sequence Diagram](team/SortInventory.png)
 
-*Figure 6: Sequence Diagram for the `sort-i` command*
+*Figure 8: Sequence Diagram for the `sort-i` command*
 
   ---
 
@@ -550,11 +566,19 @@ Key snippet from `ListIngredientCommand`:
 
   ---
 
+#### Class Diagram
+
+![List Ingredients Class Diagram](team/ListIngredientsCD.png)
+
+*Figure 9: Class Diagram for the `list-i` command*
+
+  ---
+
 #### Sequence Diagram
 
 ![List Ingredients Sequence Diagram](team/ListIngredients.png)
 
-*Figure 7: Sequence Diagram for the `list-i` command*
+*Figure 10: Sequence Diagram for the `list-i` command*
 
   ---
 
@@ -732,7 +756,7 @@ Key snippet from `RecipeBook`:
 
 ![Filter Recipe Sequence Diagram](team/FilterRecipe.png)
 
-*Figure 8: Sequence Diagram for the `filter-r` command*
+*Figure 11: Sequence Diagram for the `filter-r` command*
 
 ---
 
@@ -802,7 +826,7 @@ The feature involves three classes:
 
 ![Delete Recipe Sequence Diagram](team/DeleteRecipe.png)
 
-*Figure 9: Sequence Diagram for the `delete-r` command*
+*Figure 12: Sequence Diagram for the `delete-r` command*
 
 ---
 
@@ -905,11 +929,11 @@ Key snippet from `FuzzySearch`:
 
 ![Search Recipe Sequence Diagram](team/SearchRecipe.png)
 
-*Figure 10: Sequence Diagram for the `search-r` command*
+*Figure 13: Sequence Diagram for the `search-r` command*
 
 ![Search Ingredient Sequence Diagram](team/SearchIngredient.png)
 
-*Figure 11: Sequence Diagram for the `search-i` command*
+*Figure 14: Sequence Diagram for the `search-i` command*
 
 ---
 
@@ -1036,7 +1060,7 @@ The `help` feature is implemented using a simple command pattern that bridges to
 
 ![Help Sequence Diagram](team/Help.png)
 
-*Figure 12: Sequence Diagram for the `help` command*
+*Figure 15: Sequence Diagram for the `help` command*
 
 ---
 

@@ -1,7 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
-autonumber
 hide footbox
 
 skinparam MaxMessageSize 150
@@ -32,7 +31,7 @@ deactivate Parser
 SudoCook -> RecipeBook : getRecipe(index)
 activate RecipeBook
 alt index out of bounds
-    RecipeBook -> Ui : printError("Index out of bounds")
+    RecipeBook -> Ui : Print Error
     activate Ui
     Ui --> RecipeBook
     deactivate Ui

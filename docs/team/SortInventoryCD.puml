@@ -1,0 +1,47 @@
+@startuml
+!pragma layout smetana
+scale 4
+hide circle
+skinparam classAttributeIconSize 0
+
+class Command {
+    --
+    + execute(inventory: Inventory): void
+}
+
+class SortInventoryCommand {
+    --
+    + SortInventoryCommand(isExit: boolean)
+    + execute(inventory: Inventory): void
+}
+
+class Inventory {
+    - ingredients: ArrayList<Ingredient>
+    --
+    + sortIngredients(): ArrayList<Ingredient>
+}
+
+class Ingredient {
+    - name: String
+    - quantity: double
+    - unit: String
+    --
+    + getExpiryDate(): LocalDate
+}
+
+class Ui {
+    --
+    {static} + printMessage(message: String): void
+}
+
+' Inheritance
+SortInventoryCommand --|> Command
+
+' Sort flow dependencies
+SortInventoryCommand ..> Inventory
+SortInventoryCommand ..> Ui
+
+' Data relationship required by sorting
+Inventory "1" o-- "*" Ingredient
+
+@enduml
