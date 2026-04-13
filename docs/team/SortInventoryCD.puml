@@ -16,15 +16,11 @@ class SortInventoryCommand {
 }
 
 class Inventory {
-    - ingredients: ArrayList<Ingredient>
     --
     + sortIngredients(): ArrayList<Ingredient>
 }
 
 class Ingredient {
-    - name: String
-    - quantity: double
-    - unit: String
     --
     + getExpiryDate(): LocalDate
 }
