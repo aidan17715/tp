@@ -24,7 +24,7 @@ public class AddRecipeCommand extends Command {
     @Override
     public void execute(RecipeBook recipes) {
         assert(recipes!=null);
-        recipes.addRecipe(name, ingredients, steps, time, calories);
-
+        Recipe addedRecipe = recipes.addRecipe(name, ingredients, steps, time, calories);
+        Ui.printGradientMessage("Added recipe:\n" + addedRecipe.toString());
     }
 }

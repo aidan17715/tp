@@ -55,10 +55,10 @@ public class Ui {
         System.out.println("");
         System.out.println(INDENT + CYAN + "Welcome to..." + RESET);
         String logo = 
-            INDENT + "  ____            _           ____             _    \n" +
+            INDENT + "  ____            _           ____             _\n" +
             INDENT + " / ___| _   _  __| | ___     / ___|___   ___  | | __\n" +
             INDENT + " \\___ \\| | | |/ _` |/ _ \\   | |   / _ \\ / _ \\ | |/ /\n" +
-            INDENT + "  ___) | |_| | (_| | (_) |  | |__| (_) | (_) ||   < \n" +
+            INDENT + "  ___) | |_| | (_| | (_) |  | |__| (_) | (_) ||   <\n" +
             INDENT + " |____/ \\__,_|\\__,_|\\___/    \\____\\___/ \\___/ |_|\\_\\";
         
         String[] lines = logo.split("\n");
