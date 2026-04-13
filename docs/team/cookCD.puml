@@ -12,7 +12,6 @@ class Command {
 }
 
 class CookCommand {
-    - index: int
     --
     + CookCommand(isExit: boolean, index: int)
     + execute(recipe: Recipe, inventory: Inventory): void
@@ -20,9 +19,6 @@ class CookCommand {
 }
 
 class DeleteIngredientCommand {
-    - nameOrIndex: String
-    - quantityToRemove: double
-    - isRemoveAll: boolean
     --
     + DeleteIngredientCommand(nameOrIndex: String, quantityToRemove: double)
     + execute(inventory: Inventory): void
@@ -34,34 +30,24 @@ class IngredientRequirements <<utility>> {
 }
 
 class Recipe {
-    - name: String
-    - ingredients: ArrayList<Ingredient>
     --
     + getName(): String
     + getIngredients(): ArrayList<Ingredient>
 }
 
 class Inventory {
-    - ingredients: ArrayList<Ingredient>
     --
     + findIndexByName(name: String): int
     + getIngredient(index: int): Ingredient
-    + getSize(): int
     + removeIngredient(index: int): void
     + updateQuantity(index: int, quantityToRemove: double): void
 }
 
 class Ingredient {
-    - name: String
-    - quantity: double
-    - unit: String
     --
-    + Ingredient(name: String, quantity: double, unit: String)
     + getName(): String
     + getQuantity(): double
     + getUnit(): String
-    + addQuantity(quantity: double, expiryDate: LocalDate): void
-    + deductQuantity(quantityToDeduct: double): void
 }
 
 class Ui {
